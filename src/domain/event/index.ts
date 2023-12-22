@@ -1,1 +1,2 @@
-export * from './block-imported';
+export * from './block-indexed';
+export * from './transaction-indexed';

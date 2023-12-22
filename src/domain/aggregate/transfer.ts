@@ -2,7 +2,8 @@ import { isLowerAddress } from '../utils';
 import { Base } from './base';
 
 export class Transfer extends Base {
-  private readonly tokenId: string;
+  /// 전송었으나, 처음보는 경우 null
+  private readonly tokenId: string | null;
   private readonly blockId: string;
   private readonly transactionId: string;
   private readonly logIndex: number;
