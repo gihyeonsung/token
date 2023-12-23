@@ -38,7 +38,11 @@ export class InstanceService {
       // tokenURI()는 721 스펙상 OPTIOANL 하다
       return;
     }
+
     const metadata = await this.fetchMetadata(uri);
+    if (metadata === null) {
+      return;
+    }
 
     instance.updateUriAndMetadata(uri, metadata, instanceUriAndMetadataUpdatedAtBlock.id);
 
