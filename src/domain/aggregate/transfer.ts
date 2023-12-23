@@ -2,27 +2,28 @@ import { isLowerAddress } from '../utils';
 import { Base } from './base';
 
 export class Transfer extends Base {
-  /// 전송었으나, 처음보는 경우 null
-  private readonly tokenId: string | null;
-  private readonly blockId: string;
-  private readonly transactionId: string;
-  private readonly logIndex: number;
-  private readonly fromAddress: string;
-  private readonly toAddress: string;
-  private readonly value: bigint;
-  private readonly instanceId: string | null;
+  /// 무슨 토큰인지 모르고 색인된 경우 null
+  readonly tokenId: string | null;
+  readonly blockId: string;
+  readonly transactionId: string;
+  readonly logIndex: number;
+  readonly fromAddress: string;
+  readonly toAddress: string;
+  readonly amount: bigint;
+  // ERC-721, ERC-1155만 값이 있음
+  readonly instanceId: string | null;
 
   constructor(
     id: string,
     createdAt: Date,
     updatedAt: Date,
-    tokenId: string,
+    tokenId: string | null,
     blockId: string,
     transactionId: string,
     logIndex: number,
     fromAddress: string,
     toAddress: string,
-    value: bigint,
+    amount: bigint,
     instanceId: string | null,
   ) {
     super(id, createdAt, updatedAt);
@@ -38,7 +39,7 @@ export class Transfer extends Base {
     this.logIndex = logIndex;
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
-    this.value = value;
+    this.amount = amount;
     this.instanceId = instanceId;
   }
 }

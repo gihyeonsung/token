@@ -1,6 +1,11 @@
 import { WebSocketProvider } from 'ethers';
 
-import { EthersNetworkConnectorNewBlockEvent, NetworkConnector, NetworkConnectorHandler } from '../application';
+import {
+  EthersNetworkConnectorNewBlockEvent,
+  NetworkConnector,
+  NetworkConnectorHandler,
+  TransactionReceipt,
+} from '../application';
 
 export class EthersNetworkConnector implements NetworkConnector {
   private readonly provider: WebSocketProvider;
@@ -30,6 +35,27 @@ export class EthersNetworkConnector implements NetworkConnector {
       const event = { chainId: 1, number: block.number, hash: block.hash, timestamp: block.timestamp };
       await handler(event);
     });
+  }
+
+  async fetchBlock(chainId: number, blockHash: string | null): Promise<any | null> {
+    return null;
+  }
+
+  async fetchTransactionReceipt(chainId: number, transactionHash: string): Promise<TransactionReceipt | null> {
+    const receipt = await this.provider.getTransactionReceipt(transactionHash);
+    if (receipt === null) {
+      return null;
+    }
+
+    return {
+      index: receipt.index,
+      logs: receipt.logs.map((l) => ({
+        address: l.address.toLowerCase(),
+        topics: l.topics.map((t) => t.toLowerCase()),
+        data: l.data.toLowerCase(),
+        index: l.index,
+      })),
+    };
   }
 
   call(): Promise<void> {

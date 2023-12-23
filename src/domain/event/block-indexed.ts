@@ -1,10 +1,10 @@
+import { Block, Chain } from '../aggregate';
+
 export class BlockIndexedEvent {
   constructor(
-    readonly chainId: number,
-    readonly number: number,
-    readonly hash: string,
-    readonly timestamp: number,
     readonly blockId: string,
+    readonly block: Block,
+    readonly chain: Chain,
     readonly transactionHashes: string[],
   ) {}
 }
