@@ -1,7 +1,7 @@
 export abstract class Base {
   readonly id: string;
-  private createdAt: Date;
-  private updatedAt: Date;
+  private readonly createdAt: Date;
+  protected updatedAt: Date;
 
   constructor(id: string, createdAt: Date, updatedAt: Date) {
     this.id = id;

@@ -1,19 +1,22 @@
-import { TransactionIndexedEvent, TransactionLog, Transfer, TransferIndexedEvent } from '../domain';
+import { Instance, TransactionIndexedEvent, TransactionLog, Transfer, TransferIndexedEvent } from '../domain';
 
 import { MessagePublisher } from './message.publisher';
 import { TokenService } from './token.service';
 import { TransferRepository } from './transfer.repository';
+import { InstanceRepository } from './instance.repository';
+import { TokenRepository } from './token.repository';
 
 export class TransferService {
   constructor(
     private readonly transferRepository: TransferRepository,
     private readonly messagePublisher: MessagePublisher,
-    private readonly tokenService: TokenService,
+    private readonly tokenRepository: TokenRepository,
+    private readonly instanceRepository: InstanceRepository,
   ) {}
 
   static tryParseLog(
     log: TransactionLog,
-  ): { fromAddress: string; toAddress: string; amount: bigint; instanceId: string | null }[] {
+  ): { fromAddress: string; toAddress: string; amount: bigint; index: bigint | null }[] {
     const tokenType = TokenService.detectTokenTypeFromLogTopics(log.topics);
     if (tokenType === null) {
       return [];
@@ -35,10 +38,17 @@ export class TransferService {
   async handleTransactionIndexed(event: TransactionIndexedEvent) {
     const { chain, block, transaction } = event;
     for (const log of event.transaction.logs) {
-      const token = await this.tokenService.findOneByAddress(chain.id, log.address);
+      const token = await this.tokenRepository.findOneByAddress(chain.id, log.address);
       const parsedData = TransferService.tryParseLog(log);
+
       for (const data of parsedData) {
         const now = new Date();
+
+        let instance: Instance | null = null;
+        if (data.index !== null && token !== null) {
+          instance = await this.instanceRepository.findOneByTokenIdAndIndex(token.id, data.index);
+        }
+
         const transfer = new Transfer(
           this.transferRepository.nextId(),
           now,
@@ -50,10 +60,10 @@ export class TransferService {
           data.fromAddress,
           data.toAddress,
           data.amount,
-          data.instanceId,
+          instance?.id ?? null, // 이후 InstanceService에서 채워줌
         );
         await this.transferRepository.save(transfer);
-        await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chain, transaction));
+        await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chain, transaction, token));
       }
     }
   }

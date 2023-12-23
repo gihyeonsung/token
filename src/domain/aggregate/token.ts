@@ -3,7 +3,7 @@ import { Base } from './base';
 export type TokenType = 'ERC-20' | 'ERC-721' | 'ERC-1155';
 
 export class Token extends Base {
-  private readonly address: string;
+  readonly address: string; //  TODO: selfdestruct
   private type: TokenType | null;
   private name: string | null;
   private symbol: string | null;

@@ -1,6 +1,6 @@
 import { Block, Chain, Token, TokenType, TransferIndexedEvent } from '../domain';
 import { TokenIndexedEvent } from '../domain/event/token-indexed';
-import { BlockService } from './block.service';
+import { BlockRepository } from './block.repository';
 import { MessagePublisher } from './message.publisher';
 import { NetworkConnector } from './network.connector';
 import { TokenRepository } from './token.repository';
@@ -10,7 +10,7 @@ export class TokenService {
     private readonly tokenRepository: TokenRepository,
     private readonly networkConnector: NetworkConnector,
     private readonly messagePublisher: MessagePublisher,
-    private readonly blockService: BlockService,
+    private readonly blockRepository: BlockRepository,
   ) {}
 
   static readonly TOPIC_20_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -50,7 +50,7 @@ export class TokenService {
     }
     const tokenType = TokenService.detectTokenTypeFromLogTopics(transactionLog.topics);
 
-    const block = await this.blockService.getLatestBlock(chain.id);
+    const block = await this.blockRepository.findOneLatest(chain.id);
     if (block === null) {
       throw new Error('transfer indexed but block not found');
     }
@@ -89,9 +89,5 @@ export class TokenService {
     const decimals = await this.networkConnector.call(chain.standardId, block.hash, address, 'decimals', []);
     const totalSupply = await this.networkConnector.call(chain.standardId, block.hash, address, 'totalSupply', []);
     return { name, symbol, decimals, totalSupply, totalSupplyUpdatedAtBlockId: block.id };
-  }
-
-  async findOneByAddress(chainId: string, address: string): Promise<Token | null> {
-    return await this.tokenRepository.findOneByAddress(chainId, address);
   }
 }
