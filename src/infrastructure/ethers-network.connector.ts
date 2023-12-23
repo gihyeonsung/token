@@ -47,8 +47,15 @@ export class EthersNetworkConnector implements NetworkConnector {
       return null;
     }
 
+    const to = receipt.to ?? receipt.contractAddress;
+    if (to === null) {
+      throw new Error('receipt fetched, but to address not found');
+    }
+
     return {
       index: receipt.index,
+      from: receipt.from.toLowerCase(),
+      to: to.toLowerCase(),
       logs: receipt.logs.map((l) => ({
         address: l.address.toLowerCase(),
         topics: l.topics.map((t) => t.toLowerCase()),

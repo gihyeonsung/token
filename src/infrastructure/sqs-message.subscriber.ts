@@ -16,7 +16,7 @@ export class SqsMessageSubscriber implements MessageSubscriber {
     response.Messages;
   }
 
-  subscribe(subscriber: Subscriber): Promise<void> {
+  subscribe(subscriber: Subscriber): void {
     this.subscriber = subscriber;
   }
 }
