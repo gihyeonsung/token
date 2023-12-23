@@ -14,9 +14,10 @@ export class TransactionService {
 
   // TODO: block -> transaction -> transfer 등으로 넘어가면 하나의 상위 이벤트가 너무 많은 내부 이벤트를 만드는게 아닌지?
   async handleBlockIndexedEvent(event: BlockIndexedEvent) {
-    const { block, chain } = event;
-    for (const transactionHash of event.transactionHashes) {
-      const receipt = await this.networkConnector.fetchTransactionReceipt(chain.standardId, transactionHash);
+    const { block, transactionHashes } = event;
+    const chainId = block.chainId;
+    for (const transactionHash of transactionHashes) {
+      const receipt = await this.networkConnector.fetchTransactionReceiptByHash(chainId, transactionHash);
       if (receipt === null) {
         throw new Error(`transaction receipt not found`);
       }
@@ -33,9 +34,9 @@ export class TransactionService {
         receipt.to,
         receipt.logs,
       );
-      await this.transactionRepository.save(transaction);
 
-      await this.messagePublisher.publish(new TransactionIndexedEvent(transaction.id, chain, block, transaction));
+      await this.transactionRepository.save(transaction);
+      await this.messagePublisher.publish(new TransactionIndexedEvent(transaction.id, block, transaction));
     }
   }
 

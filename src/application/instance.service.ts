@@ -13,7 +13,7 @@ export class InstanceService {
   static readonly IPFS_GATEWAY_BASE_URL = 'https://ipfs.io/ipfs/';
 
   async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
-    const { chain, transfer, token } = event;
+    const { chainId, transfer, token } = event;
     const instanceId = transfer.instanceId;
     if (token === null || instanceId === null) {
       return;
@@ -28,12 +28,12 @@ export class InstanceService {
       return;
     }
 
-    const instanceUriAndMetadataUpdatedAtBlock = await this.blockRepository.findOneLatest(chain.id);
+    const instanceUriAndMetadataUpdatedAtBlock = await this.blockRepository.findOneLatest(chainId);
     if (instanceUriAndMetadataUpdatedAtBlock === null) {
       throw new Error('transfered but no block found');
     }
 
-    const uri = await this.fetchUri(chain, instanceUriAndMetadataUpdatedAtBlock, token, instance);
+    const uri = await this.fetchUri(chainId, instanceUriAndMetadataUpdatedAtBlock, token, instance);
     if (uri === null) {
       // tokenURI()는 721 스펙상 OPTIOANL 하다
       return;
@@ -53,10 +53,14 @@ export class InstanceService {
     // TODO: Transfer.instanceId, Instance.tokenId 빈곳 찾아서 업데이트 해줘야 함
   }
 
-  async fetchUri(chain: Chain, block: Block, token: Token, index: Instance): Promise<string | null> {
-    const uri = await this.networkConnector.call(chain.standardId, block.hash, token.address, 'tokenURI', [
-      index.index,
-    ]);
+  async fetchUri(chainId: string, block: Block, token: Token, index: Instance): Promise<string | null> {
+    const [uri] = await this.networkConnector.call<[string]>({
+      chainId: chainId,
+      blockHash: block.hash,
+      address: token.address,
+      functionSignature: 'function tokenURI(uint256) view returns (string)',
+      inputs: [index.index],
+    });
     return uri;
   }
 

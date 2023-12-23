@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-import { NetworkImporter } from '../src/application';
 import { EthersNetworkConnector, SqsMessageSubscriber } from '../src/infrastructure';
 
 const main = async () => {

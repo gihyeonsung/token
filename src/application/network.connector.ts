@@ -1,11 +1,16 @@
-export type EthersNetworkConnectorNewBlockEvent = {
-  chainId: number;
-  number: number;
-  hash: string;
-  timestamp: number;
+export type EthersNetworkConnectorNewBlockNumberEvent = {
+  chainId: string;
+  blockNumber: number;
 };
 
-export type Log = {
+export type Block = {
+  hash: string;
+  number: number;
+  timestamp: number;
+  transactionHashes: string[];
+};
+
+export type TransactionReceiptLog = {
   address: string;
   topics: string[];
   data: string;
@@ -16,14 +21,24 @@ export type TransactionReceipt = {
   index: number;
   from: string;
   to: string;
-  logs: Log[];
+  logs: TransactionReceiptLog[];
 };
 
 export type NetworkConnectorHandler<Event> = (event: Event) => Promise<void>;
 
 export interface NetworkConnector {
-  onNewBlock(handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockEvent>): Promise<void>;
-  fetchBlock(chainId: number, blockHash: string | null): Promise<any | null>;
-  fetchTransactionReceipt(chainId: number, transactionHash: string): Promise<TransactionReceipt | null>;
-  call(chainId: number, blockHash: string | null, address: string, name: string, args: any[]): Promise<any>;
+  onNewBlockNumber(
+    chainId: string,
+    handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>,
+  ): Promise<void>;
+  fetchBlockByHash(chainId: string, blockHash: string | null): Promise<Block | null>;
+  fetchBlockByNumber(chainId: string, blockNumber: number | null): Promise<Block | null>;
+  fetchTransactionReceiptByHash(chainId: string, transactionHash: string): Promise<TransactionReceipt | null>;
+  call<Outputs extends (bigint | string)[]>(args: {
+    chainId: string;
+    blockHash?: string;
+    address: string;
+    functionSignature: string;
+    inputs?: (bigint | string | number)[];
+  }): Promise<Outputs>;
 }

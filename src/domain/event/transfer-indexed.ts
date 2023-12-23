@@ -1,9 +1,9 @@
-import { Chain, Token, Transaction, Transfer } from '../aggregate';
+import { Token, Transaction, Transfer } from '../aggregate';
 
 export class TransferIndexedEvent {
   constructor(
     readonly transfer: Transfer,
-    readonly chain: Chain,
+    readonly chainId: string,
     readonly transaction: Transaction,
     readonly token: Token | null,
   ) {}

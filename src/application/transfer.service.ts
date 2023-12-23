@@ -36,9 +36,11 @@ export class TransferService {
 
   // TODO: block -> transaction -> transfer 등으로 넘어가면 하나의 상위 이벤트가 너무 많은 내부 이벤트를 만드는게 아닌지?
   async handleTransactionIndexed(event: TransactionIndexedEvent) {
-    const { chain, block, transaction } = event;
+    const { block, transaction } = event;
+    const chainId = block.chainId;
+
     for (const log of event.transaction.logs) {
-      const token = await this.tokenRepository.findOneByAddress(chain.id, log.address);
+      const token = await this.tokenRepository.findOneByAddress(chainId, log.address);
       const parsedData = TransferService.tryParseLog(log);
 
       for (const data of parsedData) {
@@ -63,7 +65,7 @@ export class TransferService {
           instance?.id ?? null, // 이후 InstanceService에서 채워줌
         );
         await this.transferRepository.save(transfer);
-        await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chain, transaction, token));
+        await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
       }
     }
   }

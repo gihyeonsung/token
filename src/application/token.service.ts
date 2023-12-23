@@ -1,4 +1,4 @@
-import { Block, Chain, Token, TokenType, TransferIndexedEvent } from '../domain';
+import { Block, Token, TokenType, TransferIndexedEvent } from '../domain';
 import { TokenIndexedEvent } from '../domain/event/token-indexed';
 import { BlockRepository } from './block.repository';
 import { MessagePublisher } from './message.publisher';
@@ -35,7 +35,7 @@ export class TokenService {
   }
 
   async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
-    const { chain, transaction, transfer } = event;
+    const { chainId, transaction, transfer } = event;
     if (transfer.tokenId !== null) {
       return;
     }
@@ -50,11 +50,11 @@ export class TokenService {
     }
     const tokenType = TokenService.detectTokenTypeFromLogTopics(transactionLog.topics);
 
-    const block = await this.blockRepository.findOneLatest(chain.id);
+    const block = await this.blockRepository.findOneLatest(chainId);
     if (block === null) {
       throw new Error('transfer indexed but block not found');
     }
-    const tokenMetadata = await this.fetchTokenMetadata(chain, block, tokenAddress);
+    const tokenMetadata = await this.fetchTokenMetadata(chainId, block, tokenAddress);
 
     const token = new Token(
       this.tokenRepository.nextId(),
@@ -74,7 +74,7 @@ export class TokenService {
   }
 
   async fetchTokenMetadata(
-    chain: Chain,
+    chainId: string,
     block: Block,
     address: string,
   ): Promise<{
@@ -84,10 +84,23 @@ export class TokenService {
     totalSupply: bigint | null;
     totalSupplyUpdatedAtBlockId: string | null;
   }> {
-    const name = await this.networkConnector.call(chain.standardId, block.hash, address, 'name', []);
-    const symbol = await this.networkConnector.call(chain.standardId, block.hash, address, 'symbol', []);
-    const decimals = await this.networkConnector.call(chain.standardId, block.hash, address, 'decimals', []);
-    const totalSupply = await this.networkConnector.call(chain.standardId, block.hash, address, 'totalSupply', []);
-    return { name, symbol, decimals, totalSupply, totalSupplyUpdatedAtBlockId: block.id };
+    const context = { chainId, blockHash: block.hash, address };
+    const [name] = await this.networkConnector.call<[string]>({
+      ...context,
+      functionSignature: 'function name() returns (string)',
+    });
+    const [symbol] = await this.networkConnector.call<[string]>({
+      ...context,
+      functionSignature: 'function symbol() returns (string)',
+    });
+    const [decimals] = await this.networkConnector.call<[bigint]>({
+      ...context,
+      functionSignature: 'function decimals() returns (uint8)',
+    });
+    const [totalSupply] = await this.networkConnector.call<[bigint]>({
+      ...context,
+      functionSignature: 'function totalSupply() returns (uint8)',
+    });
+    return { name, symbol, decimals: Number(decimals), totalSupply, totalSupplyUpdatedAtBlockId: block.id };
   }
 }

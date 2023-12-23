@@ -1,48 +1,70 @@
-import { WebSocketProvider } from 'ethers';
-
+import { WebSocketProvider, Block as EthersBlock, Contract } from 'ethers';
 import {
-  EthersNetworkConnectorNewBlockEvent,
+  Block,
+  EthersNetworkConnectorNewBlockNumberEvent,
   NetworkConnector,
   NetworkConnectorHandler,
   TransactionReceipt,
 } from '../application';
 
 export class EthersNetworkConnector implements NetworkConnector {
-  private readonly provider: WebSocketProvider;
+  constructor(private readonly providers: Map<string, WebSocketProvider>) {}
 
-  constructor(private readonly providerUrl: string) {
-    this.provider = new WebSocketProvider(this.providerUrl);
+  private provider(chainId: string): WebSocketProvider {
+    const provider = this.providers.get(chainId);
+    if (provider === undefined) {
+      throw new Error('provider not found');
+    }
+    return provider;
   }
 
-  async onNewBlock(handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockEvent>): Promise<void> {
-    await this.provider.on('block', async (blockNumber) => {
+  async onNewBlockNumber(
+    chainId: string,
+    handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>,
+  ): Promise<void> {
+    await this.provider(chainId).on('block', async (blockNumber) => {
       if (typeof blockNumber !== 'number') {
         console.log('got unexpected provider event', blockNumber);
         return;
       }
 
-      const block = await this.provider.getBlock(blockNumber);
-      if (block === null) {
-        console.log('new block reconiged, but failed to fetch');
-        return;
-      }
-
-      if (block.hash === null) {
-        console.log('new block body fetched, but no hash');
-        return;
-      }
-
-      const event = { chainId: 1, number: block.number, hash: block.hash, timestamp: block.timestamp };
-      await handler(event);
+      await handler({ chainId, blockNumber });
     });
   }
 
-  async fetchBlock(chainId: number, blockHash: string | null): Promise<any | null> {
-    return null;
+  static parseEthersBlock(ethersBlock: EthersBlock): Block {
+    if (ethersBlock.hash === null) {
+      throw new Error('ethers block not has no hash');
+    }
+
+    return {
+      number: ethersBlock.number,
+      hash: ethersBlock.hash,
+      timestamp: ethersBlock.timestamp,
+      transactionHashes: ethersBlock.transactions.map((hash) => hash.toLowerCase()),
+    };
   }
 
-  async fetchTransactionReceipt(chainId: number, transactionHash: string): Promise<TransactionReceipt | null> {
-    const receipt = await this.provider.getTransactionReceipt(transactionHash);
+  async fetchBlockByHash(chainId: string, blockHash: string | null): Promise<Block | null> {
+    const blockTag = blockHash ? blockHash : 'latest';
+    const ethersBlock = await this.provider(chainId).getBlock(blockTag);
+    if (ethersBlock === null) {
+      return null;
+    }
+    return EthersNetworkConnector.parseEthersBlock(ethersBlock);
+  }
+
+  async fetchBlockByNumber(chainId: string, blockNumber: number | null): Promise<Block | null> {
+    const blockTag = blockNumber ? blockNumber : 'latest';
+    const ethersBlock = await this.provider(chainId).getBlock(blockTag);
+    if (ethersBlock === null) {
+      return null;
+    }
+    return EthersNetworkConnector.parseEthersBlock(ethersBlock);
+  }
+
+  async fetchTransactionReceiptByHash(chainId: string, transactionHash: string): Promise<TransactionReceipt | null> {
+    const receipt = await this.provider(chainId).getTransactionReceipt(transactionHash);
     if (receipt === null) {
       return null;
     }
@@ -65,7 +87,20 @@ export class EthersNetworkConnector implements NetworkConnector {
     };
   }
 
-  call(): Promise<void> {
-    throw new Error('Method not implemented.');
+  async call<Outputs extends (bigint | string)[]>(args: {
+    chainId: string;
+    blockHash?: string;
+    address: string;
+    functionSignature: string;
+    inputs?: (bigint | string | number)[];
+  }): Promise<Outputs> {
+    const provider = this.provider(args.chainId);
+    const contract = new Contract(args.address, [args.functionSignature], provider);
+    const functionName = args.functionSignature.replace('function', '').trimStart().split('(')[0];
+
+    const blockTag = args.blockHash ? args.blockHash : 'latest';
+    const inputs = args.inputs ?? [];
+    const outputs = await contract[functionName](...inputs, { blockTag });
+    return outputs as Outputs;
   }
 }

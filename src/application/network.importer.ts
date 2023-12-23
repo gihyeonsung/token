@@ -9,7 +9,7 @@ export class NetworkImporter {
     // import하는 메시지는 domain event? command?
     // 이 과정은 transactional outbox로 구현되어야 하겠다
     networkConnectors.forEach((conn) => {
-      conn.onNewBlock(async (block) => {
+      conn.onNewBlockNumber(async (block) => {
         messagePublisher.publish(block);
       });
     });
