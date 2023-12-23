@@ -4,7 +4,7 @@ export type TokenType = 'ERC-20' | 'ERC-721' | 'ERC-1155';
 
 export class Token extends Base {
   private readonly address: string;
-  private readonly type: TokenType;
+  private type: TokenType | null;
   private name: string | null;
   private symbol: string | null;
   private decimals: number | null;
@@ -16,7 +16,7 @@ export class Token extends Base {
     createdAt: Date,
     updatedAt: Date,
     address: string,
-    type: TokenType,
+    type: TokenType | null,
     name: string | null,
     symbol: string | null,
     decimals: number | null,

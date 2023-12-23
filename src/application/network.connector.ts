@@ -14,6 +14,8 @@ export type Log = {
 
 export type TransactionReceipt = {
   index: number;
+  from: string;
+  to: string;
   logs: Log[];
 };
 
@@ -23,5 +25,5 @@ export interface NetworkConnector {
   onNewBlock(handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockEvent>): Promise<void>;
   fetchBlock(chainId: number, blockHash: string | null): Promise<any | null>;
   fetchTransactionReceipt(chainId: number, transactionHash: string): Promise<TransactionReceipt | null>;
-  call(chainId: number, blockHash: string | null): Promise<any>;
+  call(chainId: number, blockHash: string | null, address: string, name: string, args: any[]): Promise<any>;
 }

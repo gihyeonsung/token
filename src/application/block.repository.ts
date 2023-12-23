@@ -2,4 +2,6 @@ import { Block } from '../domain';
 
 import { GenericRepository } from './generic.repository';
 
-export type BlockRepository = GenericRepository<Block>;
+export interface BlockRepository extends GenericRepository<Block> {
+  findOneLatest(chainId: string): Promise<Block | null>;
+}

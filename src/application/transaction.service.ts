@@ -1,4 +1,5 @@
 import { BlockIndexedEvent, Transaction, TransactionIndexedEvent } from '../domain';
+import { TokenIndexedEvent } from '../domain/event/token-indexed';
 
 import { MessagePublisher } from './message.publisher';
 import { NetworkConnector } from './network.connector';
@@ -28,11 +29,19 @@ export class TransactionService {
         block.id,
         transactionHash,
         receipt.index,
+        receipt.from,
+        receipt.to,
         receipt.logs,
       );
       await this.transactionRepository.save(transaction);
 
       await this.messagePublisher.publish(new TransactionIndexedEvent(transaction.id, chain, block, transaction));
     }
+  }
+
+  async handleTokenIndexedEvent(event: TokenIndexedEvent) {
+    const { token } = event;
+
+    // TODO: 해당 토큰을 가진 transfer 들의 tokenId 채워주기
   }
 }
