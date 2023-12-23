@@ -18,18 +18,16 @@ export class EthersNetworkConnector implements NetworkConnector {
     return provider;
   }
 
-  async onNewBlockNumber(
-    chainId: string,
-    handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>,
-  ): Promise<void> {
-    await this.provider(chainId).on('block', async (blockNumber) => {
-      if (typeof blockNumber !== 'number') {
-        console.log('got unexpected provider event', blockNumber);
-        return;
-      }
-
-      await handler({ chainId, blockNumber });
-    });
+  async onNewBlockNumber(handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>): Promise<void> {
+    for (const [chainId, provider] of this.providers.entries()) {
+      await provider.on('block', async (blockNumber) => {
+        if (typeof blockNumber !== 'number') {
+          console.log('got unexpected provider event', blockNumber);
+          return;
+        }
+        await handler({ chainId, blockNumber });
+      });
+    }
   }
 
   static parseEthersBlock(ethersBlock: EthersBlock): Block {
