@@ -27,10 +27,7 @@ export type TransactionReceipt = {
 export type NetworkConnectorHandler<Event> = (event: Event) => Promise<void>;
 
 export interface NetworkConnector {
-  onNewBlockNumber(
-    chainId: string,
-    handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>,
-  ): Promise<void>;
+  onNewBlockNumber(handler: NetworkConnectorHandler<EthersNetworkConnectorNewBlockNumberEvent>): Promise<void>;
   fetchBlockByHash(chainId: string, blockHash: string | null): Promise<Block | null>;
   fetchBlockByNumber(chainId: string, blockNumber: number | null): Promise<Block | null>;
   fetchTransactionReceiptByHash(chainId: string, transactionHash: string): Promise<TransactionReceipt | null>;
