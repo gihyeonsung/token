@@ -56,7 +56,6 @@ export class TransferService {
           now,
           now,
           token?.id ?? null, // 이후 TokenService에서 채워줌
-          block.id,
           transaction.id,
           log.index,
           data.fromAddress,

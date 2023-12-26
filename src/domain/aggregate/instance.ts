@@ -6,9 +6,9 @@ export class Instance extends Base {
   readonly tokenId: string;
   private ownerAddress: string;
   private uri: string | null;
-  private uriUpdatedAtBlockId: string;
-  private metadata: unknown | null;
-  private metadataUpdatedAtBlockId: string;
+  private uriUpdatedAt: Date | null;
+  private metadata: string | null;
+  private metadataUpdatedAt: Date | null;
 
   constructor(
     id: string,
@@ -18,9 +18,9 @@ export class Instance extends Base {
     tokenId: string,
     ownerAddress: string,
     uri: string | null,
-    uriUpdatedAtBlockId: string,
-    metadata: unknown | null,
-    metadataUpdatedAtBlockId: string,
+    uriUpdatedAt: Date | null,
+    metadata: string | null,
+    metadataUpdatedAt: Date | null,
   ) {
     super(id, createdAt, updatedAt);
 
@@ -30,9 +30,9 @@ export class Instance extends Base {
     this.tokenId = tokenId;
     this.ownerAddress = ownerAddress;
     this.uri = uri;
-    this.uriUpdatedAtBlockId = uriUpdatedAtBlockId;
+    this.uriUpdatedAt = uriUpdatedAt;
     this.metadata = metadata;
-    this.metadataUpdatedAtBlockId = metadataUpdatedAtBlockId;
+    this.metadataUpdatedAt = metadataUpdatedAt;
   }
 
   shouldUriAndMetadataUpdated() {
@@ -45,21 +45,21 @@ export class Instance extends Base {
     return false;
   }
 
-  updateUriAndMetadata(uri: string, metadata: unknown, uriAndMetadataUpdatedAtBlockId: string) {
+  updateUriAndMetadata(uri: string, metadata: string, uriAndMetadataUpdatedAt: Date) {
     this.updatedAt = new Date();
     this.uri = uri;
-    this.uriUpdatedAtBlockId = uriAndMetadataUpdatedAtBlockId;
+    this.uriUpdatedAt = uriAndMetadataUpdatedAt;
     this.metadata = metadata;
-    this.metadataUpdatedAtBlockId = uriAndMetadataUpdatedAtBlockId;
+    this.metadataUpdatedAt = uriAndMetadataUpdatedAt;
 
     // TODO: '수정하려고 하는 값이 기존 저장된 값보다 최근 값인 경우에만 업데이트한다'라는 제약 조건은 어디서 검사할수 있을까?
     // 1. app layer에서 받아오기
     // 2. app layer에서 검증하기
   }
 
-  updateMetadata(metadata: unknown, metadataUpdatedAtBlockId: string) {
+  updateMetadata(metadata: string, metadataUpdatedAt: Date) {
     this.updatedAt = new Date();
     this.metadata = metadata;
-    this.metadataUpdatedAtBlockId = metadataUpdatedAtBlockId;
+    this.metadataUpdatedAt = metadataUpdatedAt;
   }
 }

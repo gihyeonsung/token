@@ -4,7 +4,6 @@ import { Base } from './base';
 export class Transfer extends Base {
   /// 무슨 토큰인지 모르고 색인된 경우 null
   readonly tokenId: string | null;
-  readonly blockId: string;
   readonly transactionId: string;
   readonly logIndex: number;
   readonly fromAddress: string;
@@ -18,7 +17,6 @@ export class Transfer extends Base {
     createdAt: Date,
     updatedAt: Date,
     tokenId: string | null,
-    blockId: string,
     transactionId: string,
     logIndex: number,
     fromAddress: string,
@@ -34,7 +32,6 @@ export class Transfer extends Base {
     if (!isLowerAddress(toAddress)) throw new Error('toAddress must be lower address');
 
     this.tokenId = tokenId;
-    this.blockId = blockId;
     this.transactionId = transactionId;
     this.logIndex = logIndex;
     this.fromAddress = fromAddress;

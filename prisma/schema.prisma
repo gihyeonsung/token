@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model Chain {
+  id         String   @id @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  standardId Int
+  Block      Block[]
+}
+
+model Block {
+  id           String        @id @db.Uuid
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  chain        Chain         @relation(fields: [chainId], references: [id])
+  chainId      String        @db.Uuid
+  number       Int
+  hash         String
+  timestamp    Int
+  transactions Transaction[]
+  Log          Log[]
+}
+
+model Transaction {
+  id        String     @id @db.Uuid
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  block     Block      @relation(fields: [blockId], references: [id])
+  blockId   String     @db.Uuid
+  hash      String
+  index     Int
+  logs      Log[]
+  transfers Transfer[]
+}
+
+model Log {
+  id            String      @id @db.Uuid
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  block         Block       @relation(fields: [blockId], references: [id])
+  blockId       String      @db.Uuid
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String      @db.Uuid
+  index         Int
+  address       String
+  topic0        String?
+  topic1        String?
+  topic2        String?
+  topic3        String?
+  data          String
+}
+
+model Transfer {
+  id            String      @id @db.Uuid
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  transactionId String      @db.Uuid
+  token         Token?      @relation(fields: [tokenId], references: [id])
+  tokenId       String      @unique @db.Uuid
+  instance      Instance?   @relation(fields: [instanceId], references: [id])
+  instanceId    String?     @db.Uuid
+  fromAddress   String
+  toAddress     String
+  amount        BigInt
+}
+
+model Token {
+  id                 String            @id @db.Uuid
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  type               String?
+  name               String?
+  symbol             String?
+  decimals           Int?
+  tokenTotalSupply   TokenTotalSupply?
+  tokenTotalSupplyId String            @db.Uuid
+  instances          Instance[]
+  transfers          Transfer?
+  balances           Balance[]
+}
+
+model TokenTotalSupply {
+  id          String   @id @db.Uuid
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  token       Token    @relation(fields: [tokenId], references: [id])
+  tokenId     String   @unique @db.Uuid
+  totalSupply BigInt
+}
+
+model Instance {
+  id               String            @id @db.Uuid
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  index            BigInt
+  token            Token             @relation(fields: [tokenId], references: [id])
+  tokenId          String            @unique @db.Uuid
+  transfer         Transfer[]
+  transferId       String            @db.Uuid
+  ownerAddress     String
+  balances         Balance[]
+  instanceMetadata InstanceMetadata?
+}
+
+model InstanceMetadata {
+  id                String    @id @db.Uuid
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  instance          Instance  @relation(fields: [instanceId], references: [id])
+  instanceId        String    @unique @db.Uuid
+  uri               String?
+  uriUpdatedAt      DateTime?
+  metadata          String?
+  metadataUpdatedAt DateTime?
+}
+
+model Balance {
+  id           String   @id @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  token        Token    @relation(fields: [tokenId], references: [id])
+  tokenId      String   @db.Uuid
+  instance     Instance @relation(fields: [instanceId], references: [id])
+  instanceId   String   @db.Uuid
+  ownerAddress String
+  amount       BigInt
+}
