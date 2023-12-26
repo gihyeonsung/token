@@ -1,4 +1,10 @@
 export type Config = {
-  rpcProviders: { chainStandardId: number; websocketUrl: string }[];
+  chains: {
+    standardId: number;
+    websocketJsonRpcUrl: string;
+  }[];
+  ipfsGateway: {
+    baseUrl: string;
+  };
   awsSqsQueueUrl: string;
 };

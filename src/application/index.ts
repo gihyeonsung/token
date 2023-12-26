@@ -1,4 +1,7 @@
 export * from './block.repository';
+export * from './chain.repository';
+export * from './chain.service';
+export * from './generic.repository';
 export * from './message.publisher';
 export * from './message.subscriber';
 export * from './network.connector';

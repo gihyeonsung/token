@@ -2,4 +2,6 @@ import { Chain } from '../domain';
 
 import { GenericRepository } from './generic.repository';
 
-export type ChainRepository = GenericRepository<Chain>;
+export interface ChainRepository extends GenericRepository<Chain> {
+  findOneByStandardId(standardId: number): Promise<Chain | null>;
+}
