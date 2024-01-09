@@ -1,4 +1,4 @@
-import { BlockIndexedEvent, Transaction, TransactionIndexedEvent } from '../domain';
+import { BlockIndexedEvent, Log, Transaction, TransactionIndexedEvent } from '../domain';
 import { TokenIndexedEvent } from '../domain/event/token-indexed';
 
 import { MessagePublisher } from './message.publisher';
@@ -22,9 +22,12 @@ export class TransactionService {
         throw new Error(`transaction receipt not found`);
       }
 
+      // TODO: factory 등으로 생성 간소화
+      // TODO: trasaction.log의 id 생성을 어떤식으로 하는게 좋을지 고려
       const now = new Date();
+      const transactionId = this.transactionRepository.nextId();
       const transaction = new Transaction(
-        this.transactionRepository.nextId(),
+        transactionId,
         now,
         now,
         block.id,
@@ -32,7 +35,23 @@ export class TransactionService {
         receipt.index,
         receipt.from,
         receipt.to,
-        receipt.logs,
+        receipt.logs.map(
+          (l) =>
+            new Log(
+              this.transactionRepository.nextId(),
+              now,
+              now,
+              block.id,
+              transactionId,
+              l.index,
+              l.address,
+              l.topics.at(0) ?? null,
+              l.topics.at(1) ?? null,
+              l.topics.at(2) ?? null,
+              l.topics.at(3) ?? null,
+              l.data,
+            ),
+        ),
       );
 
       await this.transactionRepository.save(transaction);

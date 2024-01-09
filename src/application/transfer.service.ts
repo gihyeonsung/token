@@ -1,4 +1,4 @@
-import { Instance, TransactionIndexedEvent, TransactionLog, Transfer, TransferIndexedEvent } from '../domain';
+import { Instance, TransactionIndexedEvent, Log, Transfer, TransferIndexedEvent } from '../domain';
 
 import { MessagePublisher } from './message.publisher';
 import { TokenService } from './token.service';
@@ -14,10 +14,10 @@ export class TransferService {
     private readonly instanceRepository: InstanceRepository,
   ) {}
 
-  static tryParseLog(
-    log: TransactionLog,
-  ): { fromAddress: string; toAddress: string; amount: bigint; index: bigint | null }[] {
-    const tokenType = TokenService.detectTokenTypeFromLogTopics(log.topics);
+  static tryParseLog(log: Log): { fromAddress: string; toAddress: string; amount: bigint; index: bigint | null }[] {
+    // TODO: impl
+    // const tokenType = TokenService.detectTokenTypeFromLogTopics(log.topics);
+    const tokenType = null;
     if (tokenType === null) {
       return [];
     }
