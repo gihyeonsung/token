@@ -30,10 +30,12 @@ export class TokenController {
 
 /**
  * GET /chain/:chain-id/tokens
+ * POST /chain/:chain-id/tokens/import
  * GET /chain/:chain-id/tokens/:address
  * GET /chain/:chain-id/tokens/:address/transfers
  * GET /chain/:chain-id/tokens/:address/instances
  * GET /chain/:chain-id/tokens/:address/instances/:instance-id
+ * POST /chain/:chain-id/tokens/:address/instances/:instance-id/refresh
  * GET /chain/:chain-id/tokens/:address/instances/:instance-id/transfers
  * GET /chain/:chain-id/addresses/:address/balances
  * GET /chain/:chain-id/addresses/:address/transfers

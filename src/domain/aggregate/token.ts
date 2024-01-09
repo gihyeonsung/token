@@ -4,7 +4,7 @@ export type TokenType = 'ERC-20' | 'ERC-721' | 'ERC-1155';
 
 export class Token extends Base {
   readonly address: string; //  TODO: selfdestruct
-  private type: TokenType | null;
+  readonly type: TokenType | null;
   private name: string | null;
   private symbol: string | null;
   private decimals: number | null;

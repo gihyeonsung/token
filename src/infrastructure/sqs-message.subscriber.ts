@@ -1,4 +1,4 @@
-import { ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
 import { MessageSubscriber, Subscriber } from '../application';
 
@@ -11,9 +11,27 @@ export class SqsMessageSubscriber implements MessageSubscriber {
   }
 
   async listen(): Promise<void> {
-    const command = new ReceiveMessageCommand({ QueueUrl: this.sqsQueueUrl, WaitTimeSeconds: 0 });
-    const response = await this.sqsClient.send(command);
-    response.Messages;
+    while (true) {
+      const command = new ReceiveMessageCommand({
+        QueueUrl: this.sqsQueueUrl,
+        MaxNumberOfMessages: 1,
+        WaitTimeSeconds: 10,
+      });
+
+      const response = await this.sqsClient.send(command);
+      if (!response.Messages || response.Messages.length !== 1) {
+        continue;
+      }
+
+      const message = response.Messages[0];
+      if (this.subscriber) {
+        await this.subscriber(JSON.parse(message.Body ?? 'null'));
+      }
+
+      await this.sqsClient.send(
+        new DeleteMessageCommand({ QueueUrl: this.sqsQueueUrl, ReceiptHandle: message.ReceiptHandle }),
+      );
+    }
   }
 
   subscribe(subscriber: Subscriber): void {

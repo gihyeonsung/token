@@ -1,5 +1,4 @@
 import { BlockIndexedEvent, Log, Transaction, TransactionIndexedEvent } from '../domain';
-import { TokenIndexedEvent } from '../domain/event/token-indexed';
 
 import { MessagePublisher } from './message.publisher';
 import { NetworkConnector } from './network.connector';
@@ -57,11 +56,5 @@ export class TransactionService {
       await this.transactionRepository.save(transaction);
       await this.messagePublisher.publish(new TransactionIndexedEvent(transaction.id, block, transaction));
     }
-  }
-
-  async handleTokenIndexedEvent(event: TokenIndexedEvent) {
-    const { token } = event;
-
-    // TODO: 해당 토큰을 가진 transfer 들의 tokenId 채워주기
   }
 }

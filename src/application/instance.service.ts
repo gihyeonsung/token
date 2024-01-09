@@ -1,4 +1,4 @@
-import { Block, Chain, Instance, Token, TokenIndexedEvent, TransferIndexedEvent } from '../domain';
+import { Block, Instance, Token, TokenIndexedEvent, TransferIndexedEvent } from '../domain';
 import { BlockRepository } from './block.repository';
 import { InstanceRepository } from './instance.repository';
 import { NetworkConnector } from './network.connector';
@@ -15,7 +15,7 @@ export class InstanceService {
   async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
     const { chainId, transfer, token } = event;
     const instanceId = transfer.instanceId;
-    if (token === null || instanceId === null) {
+    if (token === null || token.type === 'ERC-20' || instanceId === null) {
       return;
     }
 
@@ -50,6 +50,14 @@ export class InstanceService {
   }
 
   async handleTokenIndexedEvent(event: TokenIndexedEvent): Promise<void> {
+    if (event.token.type === 'ERC-20') {
+      return;
+    }
+
+    // TODO: ERC-721 enumerable을 사용해, 새로 추가된 토큰들의 인스턴스 backfill을 시도한다
+    if (event.token.type === 'ERC-721') {
+    }
+
     // TODO: Transfer.instanceId, Instance.tokenId 빈곳 찾아서 업데이트 해줘야 함
   }
 

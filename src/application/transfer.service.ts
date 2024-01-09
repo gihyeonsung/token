@@ -1,10 +1,17 @@
-import { Instance, TransactionIndexedEvent, Log, Transfer, TransferIndexedEvent } from '../domain';
+import {
+  Instance,
+  InstanceIndexedEvent,
+  Log,
+  TokenIndexedEvent,
+  TransactionIndexedEvent,
+  Transfer,
+  TransferIndexedEvent,
+} from '../domain';
 
-import { MessagePublisher } from './message.publisher';
-import { TokenService } from './token.service';
-import { TransferRepository } from './transfer.repository';
 import { InstanceRepository } from './instance.repository';
+import { MessagePublisher } from './message.publisher';
 import { TokenRepository } from './token.repository';
+import { TransferRepository } from './transfer.repository';
 
 export class TransferService {
   constructor(
@@ -67,5 +74,17 @@ export class TransferService {
         await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
       }
     }
+  }
+
+  async handleTokenIndexedEvent(event: TokenIndexedEvent) {
+    const { token } = event;
+
+    // TODO: 해당 토큰을 가진 transfer 들의 tokenId 채워주기
+  }
+
+  async handleInstanceIndexedEvent(event: InstanceIndexedEvent) {
+    const { token } = event;
+
+    // TODO: 해당 인스턴스들의 가진 transfer 들의 tokenId 채워주기
   }
 }
