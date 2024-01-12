@@ -5,4 +5,3 @@ export * from './prisma-chain.repository';
 export * from './prisma-transaction.repository';
 export * from './sns-message.publisher';
 export * from './sqs-message.subscriber';
-export * from './token.controller';

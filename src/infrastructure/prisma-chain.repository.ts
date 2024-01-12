@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
-import { Chain } from '../domain';
 import { ChainRepository } from '../application';
+import { Chain } from '../domain';
 
 export class PrismaChainRepository implements ChainRepository {
   constructor(private readonly prismaClient: PrismaClient) {}

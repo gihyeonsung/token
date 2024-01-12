@@ -1,4 +1,5 @@
 import { Chain } from '../domain';
+
 import { ChainRepository } from './chain.repository';
 
 export class ChainService {

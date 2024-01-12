@@ -8,14 +8,13 @@ import { TransactionRepository } from './transaction.repository';
 export class TransactionService {
   constructor(
     private readonly transactionRepository: TransactionRepository,
+    private readonly networkConnector: NetworkConnector,
     private readonly messageSubscriber: MessageSubscriber,
     private readonly messagePublisher: MessagePublisher,
-    private readonly networkConnector: NetworkConnector,
   ) {
     this.messageSubscriber.on('INDEX_TRANSACTIONS', this.indexTransactions.bind(this));
   }
 
-  // TODO: block -> transaction -> transfer 등으로 넘어가면 하나의 상위 이벤트가 너무 많은 내부 이벤트를 만드는게 아닌지?
   async indexTransactions(event: BlockIndexedEvent) {
     const { block, transactionHashes } = event;
     const chainId = block.chainId;

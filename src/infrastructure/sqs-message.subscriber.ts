@@ -1,12 +1,11 @@
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
-import { Handler, Logger, MessageSubscriber } from '../application';
+import { Handler, MessageSubscriber } from '../application';
 
 export class SqsMessageSubscriber implements MessageSubscriber {
   private readonly handlers: Map<string, Handler> = new Map();
 
   constructor(
-    private readonly logger: Logger,
     private readonly awsSqsClient: SQSClient,
     private readonly queues: { name: string; awsSqsQueueUrl: string }[],
   ) {}
@@ -24,14 +23,12 @@ export class SqsMessageSubscriber implements MessageSubscriber {
         new ReceiveMessageCommand({ QueueUrl: sqsQueueUrl, MaxNumberOfMessages: 1, WaitTimeSeconds: 10 }),
       );
       if (!response.Messages || response.Messages.length !== 1) {
-        this.logger.log('sqs long polled but empty. continue new long polling', response);
         continue;
       }
 
       const message = response.Messages[0];
       const messageBody = message.Body;
       if (!messageBody) {
-        this.logger.log('sqs message body empty. continuing', response);
         continue;
       }
 

@@ -1,4 +1,5 @@
-import { WebSocketProvider, Block as EthersBlock, Contract } from 'ethers';
+import { Contract, Block as EthersBlock, WebSocketProvider } from 'ethers';
+
 import {
   Block,
   EthersNetworkConnectorNewBlockNumberEvent,

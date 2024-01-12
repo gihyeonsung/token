@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
-import { Block } from '../domain';
 import { BlockRepository } from '../application';
+import { Block } from '../domain';
 
 export class PrismaBlockRepository implements BlockRepository {
   constructor(private readonly prismaClient: PrismaClient) {}

@@ -6,8 +6,8 @@ import { parse } from 'yaml';
 
 import { ChainService, NetworkImporter } from '../src/application';
 import { EthersNetworkConnector, PrismaChainRepository, SnsMessagePublisher } from '../src/infrastructure';
+
 import { Config } from './config';
-import { ConsoleLogger } from '../src/infrastructure/console.logger';
 
 const main = async () => {
   const configString = await readFile('config.yaml', 'utf8');
@@ -21,8 +21,7 @@ const main = async () => {
   );
   const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
   const snsClient = new SNSClient();
-  const consoleLogger = new ConsoleLogger();
-  const snsMessagePublisher = new SnsMessagePublisher(consoleLogger, snsClient, config.messaging.awsSnsTopicArn);
+  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn);
   const networkImporter = new NetworkImporter(ethersNetworkConnector, snsMessagePublisher);
   await networkImporter.initialize();
 };

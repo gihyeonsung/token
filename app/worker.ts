@@ -1,20 +1,19 @@
-import { readFile } from 'fs/promises';
-import { parse } from 'yaml';
-
-import {
-  EthersNetworkConnector,
-  PrismaChainRepository,
-  PrismaTransactionRepository,
-  SqsMessageSubscriber,
-} from '../src/infrastructure';
-
 import { SNSClient } from '@aws-sdk/client-sns';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { PrismaClient } from '@prisma/client';
 import { WebSocketProvider } from 'ethers';
+import { readFile } from 'fs/promises';
+import { parse } from 'yaml';
 
 import { BlockService, ChainService, TransactionService } from '../src/application';
-import { ConsoleLogger, PrismaBlockRepository, SnsMessagePublisher } from '../src/infrastructure';
+import {
+  EthersNetworkConnector,
+  PrismaBlockRepository,
+  PrismaChainRepository,
+  PrismaTransactionRepository,
+  SnsMessagePublisher,
+  SqsMessageSubscriber,
+} from '../src/infrastructure';
 
 import { Config } from './config';
 
@@ -29,11 +28,10 @@ const main = async () => {
     chains.map((c, i) => [c.id, new WebSocketProvider(config.chains[i].websocketJsonRpcUrl)]),
   );
   const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
-  const logger = new ConsoleLogger();
   const snsClient = new SNSClient({});
-  const snsMessagePublisher = new SnsMessagePublisher(logger, snsClient, config.messaging.awsSnsTopicArn);
+  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn);
   const sqsClient = new SQSClient();
-  const sqsMessageSubscriber = new SqsMessageSubscriber(logger, sqsClient, config.messaging.queues);
+  const sqsMessageSubscriber = new SqsMessageSubscriber(sqsClient, config.messaging.queues);
 
   const prismaBlockRepository = new PrismaBlockRepository(prismaClient);
   const blockService = new BlockService(
@@ -46,9 +44,9 @@ const main = async () => {
   const prismaTransactionRepository = new PrismaTransactionRepository(prismaClient);
   const transactionService = new TransactionService(
     prismaTransactionRepository,
+    ethersNetworkConnector,
     sqsMessageSubscriber,
     snsMessagePublisher,
-    ethersNetworkConnector,
   );
 
   await sqsMessageSubscriber.listen();
