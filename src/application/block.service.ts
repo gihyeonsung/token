@@ -2,16 +2,20 @@ import { Block, BlockIndexedEvent, IndexBlockCommand } from '../domain';
 
 import { BlockRepository } from './block.repository';
 import { MessagePublisher } from './message.publisher';
+import { MessageSubscriber } from './message.subscriber';
 import { NetworkConnector } from './network.connector';
 
 export class BlockService {
   constructor(
     private readonly networkConnector: NetworkConnector,
     private readonly blockRepository: BlockRepository,
+    private readonly messageSubscriber: MessageSubscriber,
     private readonly messagePublisher: MessagePublisher,
-  ) {}
+  ) {
+    this.messageSubscriber.on('INDEX_BLOCK', this.indexBlock.bind(this));
+  }
 
-  async executeIndexBlockCommand(command: IndexBlockCommand): Promise<void> {
+  async indexBlock(command: IndexBlockCommand): Promise<void> {
     const { chainId, blockNumber } = command;
 
     const blockMetadata = await this.networkConnector.fetchBlockByNumber(chainId, blockNumber);

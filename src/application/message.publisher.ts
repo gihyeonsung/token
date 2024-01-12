@@ -1,3 +1,5 @@
+import { Message } from '../domain';
+
 export interface MessagePublisher {
-  publish(message: any): Promise<void>;
+  publish(message: Message): Promise<void>;
 }

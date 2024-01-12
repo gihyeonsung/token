@@ -1,6 +1,7 @@
-export type Subscriber = (message: any) => Promise<void>;
+export type Handler = (message: any) => Promise<void>;
 
 export interface MessageSubscriber {
-  subscribe(subscriber: Subscriber): void;
+  // TODO: delection policy ALWAYS | ON_SUCCESS | NEVER
+  on(topic: string, handler: Handler): void;
   listen(): Promise<void>;
 }

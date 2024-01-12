@@ -1,40 +1,56 @@
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
-import { MessageSubscriber, Subscriber } from '../application';
+import { Handler, Logger, MessageSubscriber } from '../application';
 
 export class SqsMessageSubscriber implements MessageSubscriber {
-  private readonly sqsClient: SQSClient;
-  private subscriber: Subscriber | null = null;
+  private readonly handlers: Map<string, Handler> = new Map();
 
-  constructor(private readonly sqsQueueUrl: string) {
-    this.sqsClient = new SQSClient({});
+  constructor(
+    private readonly logger: Logger,
+    private readonly awsSqsClient: SQSClient,
+    private readonly queues: { name: string; awsSqsQueueUrl: string }[],
+  ) {}
+
+  on(name: string, handler: Handler): void {
+    if (this.handlers.has(name)) {
+      throw new Error('multiple handler on the same queue is disallowed');
+    }
+    this.handlers.set(name, handler);
   }
 
-  async listen(): Promise<void> {
+  private async listenOne(name: string, sqsQueueUrl: string): Promise<void> {
     while (true) {
-      const command = new ReceiveMessageCommand({
-        QueueUrl: this.sqsQueueUrl,
-        MaxNumberOfMessages: 1,
-        WaitTimeSeconds: 10,
-      });
-
-      const response = await this.sqsClient.send(command);
+      const response = await this.awsSqsClient.send(
+        new ReceiveMessageCommand({ QueueUrl: sqsQueueUrl, MaxNumberOfMessages: 1, WaitTimeSeconds: 10 }),
+      );
       if (!response.Messages || response.Messages.length !== 1) {
+        this.logger.log('sqs long polled but empty. continue new long polling', response);
         continue;
       }
 
       const message = response.Messages[0];
-      if (this.subscriber) {
-        await this.subscriber(JSON.parse(message.Body ?? 'null'));
+      const messageBody = message.Body;
+      if (!messageBody) {
+        this.logger.log('sqs message body empty. continuing', response);
+        continue;
       }
 
-      await this.sqsClient.send(
-        new DeleteMessageCommand({ QueueUrl: this.sqsQueueUrl, ReceiptHandle: message.ReceiptHandle }),
+      const handler = this.handlers.get(name);
+      if (handler) {
+        await handler(JSON.parse(messageBody));
+      }
+
+      await this.awsSqsClient.send(
+        new DeleteMessageCommand({ QueueUrl: sqsQueueUrl, ReceiptHandle: message.ReceiptHandle }),
       );
     }
   }
 
-  subscribe(subscriber: Subscriber): void {
-    this.subscriber = subscriber;
+  async listen(): Promise<void> {
+    await Promise.all(
+      this.queues.map(async (q) => {
+        await this.listenOne(q.name, q.awsSqsQueueUrl);
+      }),
+    );
   }
 }

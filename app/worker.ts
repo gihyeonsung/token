@@ -4,14 +4,19 @@ import { parse } from 'yaml';
 import {
   EthersNetworkConnector,
   PrismaChainRepository,
-  SqsMessagePublisher,
+  PrismaTransactionRepository,
   SqsMessageSubscriber,
 } from '../src/infrastructure';
 
-import { Config } from './config';
+import { SNSClient } from '@aws-sdk/client-sns';
+import { SQSClient } from '@aws-sdk/client-sqs';
 import { PrismaClient } from '@prisma/client';
 import { WebSocketProvider } from 'ethers';
-import { ChainService } from '../src/application';
+
+import { BlockService, ChainService, TransactionService } from '../src/application';
+import { ConsoleLogger, PrismaBlockRepository, SnsMessagePublisher } from '../src/infrastructure';
+
+import { Config } from './config';
 
 const main = async () => {
   const configString = await readFile('config.yaml', 'utf8');
@@ -24,11 +29,28 @@ const main = async () => {
     chains.map((c, i) => [c.id, new WebSocketProvider(config.chains[i].websocketJsonRpcUrl)]),
   );
   const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
-  const sqsMessagePublisher = new SqsMessagePublisher(config.awsSqsQueueUrl);
-  const sqsMessageSubscriber = new SqsMessageSubscriber(config.awsSqsQueueUrl);
-  sqsMessageSubscriber.subscribe(async (message) => {
-    console.log('received', message);
-  });
+  const logger = new ConsoleLogger();
+  const snsClient = new SNSClient({});
+  const snsMessagePublisher = new SnsMessagePublisher(logger, snsClient, config.messaging.awsSnsTopicArn);
+  const sqsClient = new SQSClient();
+  const sqsMessageSubscriber = new SqsMessageSubscriber(logger, sqsClient, config.messaging.queues);
+
+  const prismaBlockRepository = new PrismaBlockRepository(prismaClient);
+  const blockService = new BlockService(
+    ethersNetworkConnector,
+    prismaBlockRepository,
+    sqsMessageSubscriber,
+    snsMessagePublisher,
+  );
+
+  const prismaTransactionRepository = new PrismaTransactionRepository(prismaClient);
+  const transactionService = new TransactionService(
+    prismaTransactionRepository,
+    sqsMessageSubscriber,
+    snsMessagePublisher,
+    ethersNetworkConnector,
+  );
+
   await sqsMessageSubscriber.listen();
 };
 

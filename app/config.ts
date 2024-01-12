@@ -6,5 +6,11 @@ export type Config = {
   ipfsGateway: {
     baseUrl: string;
   };
-  awsSqsQueueUrl: string;
+  messaging: {
+    awsSnsTopicArn: string;
+    queues: {
+      name: string;
+      awsSqsQueueUrl: string;
+    }[];
+  };
 };

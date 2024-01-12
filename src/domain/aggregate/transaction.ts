@@ -29,10 +29,10 @@ export class Log extends Base {
     super(id, createdAt, updatedAt);
 
     if (!isLowerAddress(address)) throw new Error('address must be lower address');
-    if (!(topic0 !== null && isLowerHexString(topic0, 66))) throw new Error('topic0 must be null or lower hex string');
-    if (!(topic1 !== null && isLowerHexString(topic1, 66))) throw new Error('topic1 must be null or lower hex string');
-    if (!(topic2 !== null && isLowerHexString(topic2, 66))) throw new Error('topic2 must be null or lower hex string');
-    if (!(topic3 !== null && isLowerHexString(topic3, 66))) throw new Error('topic3 must be null or lower hex string');
+    if (!(topic0 === null || isLowerHexString(topic0, 66))) throw new Error('topic0 must be null or lower hex string');
+    if (!(topic1 === null || isLowerHexString(topic1, 66))) throw new Error('topic1 must be null or lower hex string');
+    if (!(topic2 === null || isLowerHexString(topic2, 66))) throw new Error('topic2 must be null or lower hex string');
+    if (!(topic3 === null || isLowerHexString(topic3, 66))) throw new Error('topic3 must be null or lower hex string');
     if (!isLowerHexString(data)) throw new Error('data must be lower address');
 
     this.blockId = blockId;
