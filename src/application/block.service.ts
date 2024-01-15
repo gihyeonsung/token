@@ -38,6 +38,6 @@ export class BlockService {
     await this.blockRepository.save(block);
     await this.messagePublisher.publish(new BlockIndexedEvent(block.id, block, blockMetadata.transactionHashes));
 
-    this.logger.info('block indexed', block.id, block.number);
+    this.logger.info('block indexed', block.number);
   }
 }

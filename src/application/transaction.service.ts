@@ -1,5 +1,6 @@
 import { BlockIndexedEvent, Log, Transaction, TransactionIndexedEvent } from '../domain';
 
+import { Logger } from './logger';
 import { MessagePublisher } from './message.publisher';
 import { MessageSubscriber } from './message.subscriber';
 import { NetworkConnector } from './network.connector';
@@ -11,6 +12,7 @@ export class TransactionService {
     private readonly networkConnector: NetworkConnector,
     private readonly messageSubscriber: MessageSubscriber,
     private readonly messagePublisher: MessagePublisher,
+    private readonly logger: Logger,
   ) {
     this.messageSubscriber.on('INDEX_TRANSACTIONS', this.indexTransactions.bind(this));
   }
@@ -58,6 +60,8 @@ export class TransactionService {
 
       await this.transactionRepository.save(transaction);
       await this.messagePublisher.publish(new TransactionIndexedEvent(transaction.id, block, transaction));
+
+      this.logger.info('transaction indexed', block.number, transaction.hash);
     }
   }
 }

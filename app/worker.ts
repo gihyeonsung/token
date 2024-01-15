@@ -56,6 +56,7 @@ const main = async () => {
     ethersNetworkConnector,
     sqsMessageSubscriber,
     snsMessagePublisher,
+    consoleLogger,
   );
 
   const prismaTransferRepository = new PrismaTransferRepository(prismaClient);

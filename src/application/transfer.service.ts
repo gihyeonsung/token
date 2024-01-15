@@ -122,7 +122,8 @@ export class TransferService {
         );
         await this.transferRepository.save(transfer);
         await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
-        this.logger.info('transfer indexed', transfer.id);
+
+        this.logger.info('transfer indexed', block.number, transaction.hash, transfer.fromAddress, transfer.toAddress);
       }
     }
   }
