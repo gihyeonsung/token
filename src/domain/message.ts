@@ -1,3 +1,3 @@
 export interface Message {
-  topic: string;
+  readonly topic: string;
 }

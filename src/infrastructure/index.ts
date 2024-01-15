@@ -1,5 +1,6 @@
 export * from './console.logger';
 export * from './ethers-network.connector';
+export * from './message.serializer';
 export * from './prisma-block.repository';
 export * from './prisma-chain.repository';
 export * from './prisma-instance.repository';

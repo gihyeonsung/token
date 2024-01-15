@@ -9,6 +9,7 @@ import { BlockService, ChainService, TransactionService, TransferService } from 
 import {
   ConsoleLogger,
   EthersNetworkConnector,
+  MessageSerializer,
   PrismaBlockRepository,
   PrismaChainRepository,
   PrismaInstanceRepository,
@@ -32,17 +33,21 @@ const main = async () => {
     chains.map((c, i) => [c.id, new WebSocketProvider(config.chains[i].websocketJsonRpcUrl)]),
   );
   const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
+
+  const messageSerializer = new MessageSerializer();
   const snsClient = new SNSClient({});
-  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn);
+  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn, messageSerializer);
   const sqsClient = new SQSClient();
-  const sqsMessageSubscriber = new SqsMessageSubscriber(sqsClient, config.messaging.queues);
+  const sqsMessageSubscriber = new SqsMessageSubscriber(sqsClient, config.messaging.queues, messageSerializer);
 
   const prismaBlockRepository = new PrismaBlockRepository(prismaClient);
+  const consoleLogger = new ConsoleLogger();
   const blockService = new BlockService(
     ethersNetworkConnector,
     prismaBlockRepository,
     sqsMessageSubscriber,
     snsMessagePublisher,
+    consoleLogger,
   );
 
   const prismaTransactionRepository = new PrismaTransactionRepository(prismaClient);
@@ -57,7 +62,6 @@ const main = async () => {
   const prismaTokenRepository = new PrismaTokenRepository(prismaClient);
   const prismaInstanceRepository = new PrismaInstanceRepository(prismaClient);
 
-  const consoleLogger = new ConsoleLogger();
   const transfersService = new TransferService(
     prismaTransferRepository,
     prismaTokenRepository,

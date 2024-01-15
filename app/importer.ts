@@ -5,7 +5,12 @@ import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 
 import { ChainService, NetworkImporter } from '../src/application';
-import { EthersNetworkConnector, PrismaChainRepository, SnsMessagePublisher } from '../src/infrastructure';
+import {
+  EthersNetworkConnector,
+  MessageSerializer,
+  PrismaChainRepository,
+  SnsMessagePublisher,
+} from '../src/infrastructure';
 
 import { Config } from './config';
 
@@ -21,7 +26,8 @@ const main = async () => {
   );
   const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
   const snsClient = new SNSClient();
-  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn);
+  const messageSerializer = new MessageSerializer();
+  const snsMessagePublisher = new SnsMessagePublisher(snsClient, config.messaging.awsSnsTopicArn, messageSerializer);
   const networkImporter = new NetworkImporter(ethersNetworkConnector, snsMessagePublisher);
   await networkImporter.initialize();
 };

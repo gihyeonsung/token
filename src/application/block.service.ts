@@ -1,6 +1,7 @@
 import { Block, BlockIndexedEvent, IndexBlockCommand } from '../domain';
 
 import { BlockRepository } from './block.repository';
+import { Logger } from './logger';
 import { MessagePublisher } from './message.publisher';
 import { MessageSubscriber } from './message.subscriber';
 import { NetworkConnector } from './network.connector';
@@ -11,6 +12,7 @@ export class BlockService {
     private readonly blockRepository: BlockRepository,
     private readonly messageSubscriber: MessageSubscriber,
     private readonly messagePublisher: MessagePublisher,
+    private readonly logger: Logger,
   ) {
     this.messageSubscriber.on('INDEX_BLOCK', this.indexBlock.bind(this));
   }
@@ -35,5 +37,7 @@ export class BlockService {
     );
     await this.blockRepository.save(block);
     await this.messagePublisher.publish(new BlockIndexedEvent(block.id, block, blockMetadata.transactionHashes));
+
+    this.logger.info('block indexed', block.id, block.number);
   }
 }

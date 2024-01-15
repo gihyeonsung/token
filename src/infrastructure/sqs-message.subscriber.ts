@@ -2,12 +2,15 @@ import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk
 
 import { Handler, MessageSubscriber } from '../application';
 
+import { MessageSerializer } from './message.serializer';
+
 export class SqsMessageSubscriber implements MessageSubscriber {
   private readonly handlers: Map<string, Handler> = new Map();
 
   constructor(
     private readonly awsSqsClient: SQSClient,
     private readonly queues: { name: string; awsSqsQueueUrl: string }[],
+    private readonly messageSerializer: MessageSerializer,
   ) {}
 
   on(name: string, handler: Handler): void {
@@ -34,7 +37,7 @@ export class SqsMessageSubscriber implements MessageSubscriber {
 
       const handler = this.handlers.get(name);
       if (handler) {
-        await handler(JSON.parse(messageBody));
+        await handler(this.messageSerializer.toMessage(messageBody));
       }
 
       await this.awsSqsClient.send(
