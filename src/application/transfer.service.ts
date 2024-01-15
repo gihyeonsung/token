@@ -120,6 +120,10 @@ export class TransferService {
           transferValue.to,
           transferValue.amount,
         );
+        if (transfer.amount > 9223372036854775807n) {
+          this.logger.error('amount too large. skip save', transfer.amount);
+          return;
+        }
         await this.transferRepository.save(transfer);
         await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
 
