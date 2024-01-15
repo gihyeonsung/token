@@ -5,12 +5,16 @@ import { WebSocketProvider } from 'ethers';
 import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 
-import { BlockService, ChainService, TransactionService } from '../src/application';
+import { BlockService, ChainService, TransactionService, TransferService } from '../src/application';
 import {
+  ConsoleLogger,
   EthersNetworkConnector,
   PrismaBlockRepository,
   PrismaChainRepository,
+  PrismaInstanceRepository,
+  PrismaTokenRepository,
   PrismaTransactionRepository,
+  PrismaTransferRepository,
   SnsMessagePublisher,
   SqsMessageSubscriber,
 } from '../src/infrastructure';
@@ -47,6 +51,20 @@ const main = async () => {
     ethersNetworkConnector,
     sqsMessageSubscriber,
     snsMessagePublisher,
+  );
+
+  const prismaTransferRepository = new PrismaTransferRepository(prismaClient);
+  const prismaTokenRepository = new PrismaTokenRepository(prismaClient);
+  const prismaInstanceRepository = new PrismaInstanceRepository(prismaClient);
+
+  const consoleLogger = new ConsoleLogger();
+  const transfersService = new TransferService(
+    prismaTransferRepository,
+    prismaTokenRepository,
+    prismaInstanceRepository,
+    sqsMessageSubscriber,
+    snsMessagePublisher,
+    consoleLogger,
   );
 
   await sqsMessageSubscriber.listen();

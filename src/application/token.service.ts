@@ -1,4 +1,4 @@
-import { Block, Token, TokenType, TransferIndexedEvent } from '../domain';
+import { Block, Token, TransferIndexedEvent } from '../domain';
 import { TokenIndexedEvent } from '../domain/event/token-indexed';
 import { BlockRepository } from './block.repository';
 import { MessagePublisher } from './message.publisher';
@@ -12,27 +12,6 @@ export class TokenService {
     private readonly messagePublisher: MessagePublisher,
     private readonly blockRepository: BlockRepository,
   ) {}
-
-  static readonly TOPIC_20_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-  static readonly TOPIC_721_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-  static readonly TOPIC_1155_TRANSFER_SINGLE = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
-  static readonly TOPIC_1155_TRANSFER_BATCH = '0x4a39dc06d4c0dbc64b70af90fd698a233a518aa5d07e595d983b8c0526c8f7fb';
-
-  static detectTokenTypeFromLogTopics(topics: string[]): TokenType | null {
-    if (topics.length === 3 && topics[0] === this.TOPIC_20_TRANSFER) {
-      return 'ERC-20';
-    }
-    if (topics.length === 4 && topics[0] === this.TOPIC_721_TRANSFER) {
-      return 'ERC-721';
-    }
-    if (topics.length === 4 && topics[0] === this.TOPIC_1155_TRANSFER_SINGLE) {
-      return 'ERC-1155';
-    }
-    if (topics.length === 4 && topics[0] === this.TOPIC_1155_TRANSFER_BATCH) {
-      return 'ERC-1155';
-    }
-    return null;
-  }
 
   async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
     const { chainId, transaction, transfer } = event;
@@ -48,7 +27,9 @@ export class TokenService {
     if (transactionLog === null) {
       throw new Error('transfer event log not found');
     }
-    const tokenType = TokenService.detectTokenTypeFromLogTopics(transactionLog.topics);
+    // TODO: 토큰의 종류를 식별하는 방법들로 타입을 식별하라
+    // const tokenType = TransferService.extractTransferValues(transactionLog.topics);
+    const tokenType = 'ERC-20';
 
     const block = await this.blockRepository.findOneLatest(chainId);
     if (block === null) {

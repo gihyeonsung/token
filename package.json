@@ -3,7 +3,8 @@
     "dev:api": "nodemon --ext \"ts\" --exec \"ts-node app/worker.ts\" --watch \"**/*.ts\"",
     "dev:worker": "nodemon --ext \"ts\" --exec \"ts-node app/worker.ts\" --watch \"**/*.ts\"",
     "dev:importer": "nodemon --ext \"ts\" --exec \"ts-node app/importer.ts\" --watch \"**/*.ts\"",
-    "test": "jest"
+    "test": "jest",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },
   "dependencies": {
     "@aws-sdk/client-sns": "^3.485.0",

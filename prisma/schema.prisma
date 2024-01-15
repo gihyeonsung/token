@@ -13,6 +13,7 @@ model Chain {
   updatedAt  DateTime @updatedAt
   standardId Int
   Block      Block[]
+  Token      Token[]
 }
 
 model Block {
@@ -66,7 +67,7 @@ model Transfer {
   transaction   Transaction @relation(fields: [transactionId], references: [id])
   transactionId String      @db.Uuid
   token         Token?      @relation(fields: [tokenId], references: [id])
-  tokenId       String      @unique @db.Uuid
+  tokenId       String?     @unique @db.Uuid
   instance      Instance?   @relation(fields: [instanceId], references: [id])
   instanceId    String?     @db.Uuid
   fromAddress   String
@@ -75,53 +76,37 @@ model Transfer {
 }
 
 model Token {
-  id                 String            @id @db.Uuid
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  type               String?
-  name               String?
-  symbol             String?
-  decimals           Int?
-  tokenTotalSupply   TokenTotalSupply?
-  tokenTotalSupplyId String            @db.Uuid
-  instances          Instance[]
-  transfers          Transfer?
-  balances           Balance[]
-}
-
-model TokenTotalSupply {
-  id          String   @id @db.Uuid
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  token       Token    @relation(fields: [tokenId], references: [id])
-  tokenId     String   @unique @db.Uuid
-  totalSupply BigInt
+  id                   String     @id @db.Uuid
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  chain                Chain      @relation(fields: [chainId], references: [id])
+  chainId              String     @db.Uuid
+  address              String
+  type                 String?
+  name                 String?
+  symbol               String?
+  decimals             Int?
+  totalSupply          BigInt?
+  totalSupplyUpdatedAt DateTime?
+  instances            Instance[]
+  transfers            Transfer?
+  balances             Balance[]
 }
 
 model Instance {
-  id               String            @id @db.Uuid
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  index            BigInt
-  token            Token             @relation(fields: [tokenId], references: [id])
-  tokenId          String            @unique @db.Uuid
-  transfer         Transfer[]
-  transferId       String            @db.Uuid
-  ownerAddress     String
-  balances         Balance[]
-  instanceMetadata InstanceMetadata?
-}
-
-model InstanceMetadata {
-  id                String    @id @db.Uuid
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  instance          Instance  @relation(fields: [instanceId], references: [id])
-  instanceId        String    @unique @db.Uuid
+  id                String     @id @db.Uuid
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  token             Token      @relation(fields: [tokenId], references: [id])
+  tokenId           String     @unique @db.Uuid
+  index             BigInt
+  ownerAddress      String
   uri               String?
   uriUpdatedAt      DateTime?
   metadata          String?
   metadataUpdatedAt DateTime?
+  transfer          Transfer[]
+  balances          Balance[]
 }
 
 model Balance {

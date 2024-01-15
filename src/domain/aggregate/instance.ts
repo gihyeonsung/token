@@ -2,8 +2,8 @@ import { isLowerAddress } from '../utils';
 import { Base } from './base';
 
 export class Instance extends Base {
-  readonly index: bigint;
   readonly tokenId: string;
+  readonly index: bigint;
   private ownerAddress: string;
   private uri: string | null;
   private uriUpdatedAt: Date | null;
@@ -14,8 +14,8 @@ export class Instance extends Base {
     id: string,
     createdAt: Date,
     updatedAt: Date,
-    index: bigint,
     tokenId: string,
+    index: bigint,
     ownerAddress: string,
     uri: string | null,
     uriUpdatedAt: Date | null,
@@ -26,8 +26,8 @@ export class Instance extends Base {
 
     if (!isLowerAddress(ownerAddress)) throw new Error('owner address must be lower address');
 
-    this.index = index;
     this.tokenId = tokenId;
+    this.index = index;
     this.ownerAddress = ownerAddress;
     this.uri = uri;
     this.uriUpdatedAt = uriUpdatedAt;
@@ -35,7 +35,31 @@ export class Instance extends Base {
     this.metadataUpdatedAt = metadataUpdatedAt;
   }
 
-  shouldUriAndMetadataUpdated() {
+  updateOwnerAddress(): string {
+    return this.ownerAddress;
+  }
+
+  getOwnerAddress(): string {
+    return this.ownerAddress;
+  }
+
+  getUri(): string | null {
+    return this.uri;
+  }
+
+  getUriUpdatedAt(): Date | null {
+    return this.uriUpdatedAt;
+  }
+
+  getMetadata(): string | null {
+    return this.metadata;
+  }
+
+  getMetadataUpdatedAt(): Date | null {
+    return this.metadataUpdatedAt;
+  }
+
+  shouldUriAndMetadataUpdated(): boolean {
     if (this.uri === null) {
       return true;
     }
