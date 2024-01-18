@@ -1,4 +1,11 @@
-import { TransactionIndexedEvent, Transfer, TransferIndexedEvent, decodeEvent } from '../domain';
+import {
+  InstanceIndexedEvent,
+  TokenIndexedEvent,
+  TransactionIndexedEvent,
+  Transfer,
+  TransferIndexedEvent,
+  decodeEvent,
+} from '../domain';
 
 import { InstanceRepository } from './instance.repository';
 import { Logger } from './logger';
@@ -17,6 +24,8 @@ export class TransferService {
     private readonly logger: Logger,
   ) {
     this.messageSubscriber.on('INDEX_TRANSFERS', this.indexTransfers.bind(this));
+    this.messageSubscriber.on('SET_EMPTY_TOKEN_ID', this.setEmptyTokenId.bind(this));
+    this.messageSubscriber.on('SET_EMPTY_INSTANCE_ID', this.setEmptyInstanceId.bind(this));
   }
 
   static readonly TOPIC_0_20_TRANSFER = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -89,6 +98,7 @@ export class TransferService {
     return [];
   }
 
+  // TODO: ExtractTransferCommand 여러개를 발행해서 나눠 처리하는식으로 해야할듯
   async indexTransfers(event: TransactionIndexedEvent) {
     const { block, transaction } = event;
     const chainId = block.chainId;
@@ -122,8 +132,9 @@ export class TransferService {
         );
         if (transfer.amount > 9223372036854775807n) {
           this.logger.error('amount too large. skip save', transfer.amount);
-          return;
+          continue;
         }
+
         await this.transferRepository.save(transfer);
         await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
 
@@ -132,11 +143,39 @@ export class TransferService {
     }
   }
 
-  async fillIndexedToken() {
-    // TODO: 해당 토큰을 가진 transfer 들의 tokenId 채워주기
+  async setEmptyTokenId(event: TokenIndexedEvent) {
+    const { token, transferTriggered } = event;
+
+    const transfer = await this.transferRepository.findOneById(transferTriggered.id);
+    if (transfer === null) {
+      throw new Error('token indexed triggered by transfer indexing, but the transfer not found');
+    }
+
+    if (transfer.getTokenId()) {
+      return;
+    }
+
+    transfer.setTokenId(token.id);
+    await this.transferRepository.save(transfer);
+
+    this.logger.info('transfer token id set', transfer.id);
   }
 
-  async fillIndexedInstance() {
-    // TODO: 해당 인스턴스들의 가진 transfer 들의 tokenId 채워주기
+  async setEmptyInstanceId(event: InstanceIndexedEvent) {
+    const { instance, transferTriggered } = event;
+
+    const transfer = await this.transferRepository.findOneById(transferTriggered.id);
+    if (transfer === null) {
+      throw new Error('instance indexed triggered by transfer indexing, but the transfer not found');
+    }
+
+    if (transfer.getInstanceId()) {
+      return;
+    }
+
+    transfer.setInstanceId(instance.id);
+    await this.transferRepository.save(transfer);
+
+    this.logger.info('transfer instance id set', transfer.id);
   }
 }

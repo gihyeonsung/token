@@ -4,9 +4,9 @@ import { Base } from './base';
 export class Transfer extends Base {
   readonly transactionId: string;
   // 무슨 토큰인지 모르고 색인된 경우 null
-  readonly tokenId: string | null;
+  private tokenId: string | null;
   // ERC-721, ERC-1155만 값이 있음
-  readonly instanceId: string | null;
+  private instanceId: string | null;
   readonly fromAddress: string;
   readonly toAddress: string;
   readonly amount: bigint;
@@ -35,5 +35,24 @@ export class Transfer extends Base {
     this.fromAddress = fromAddress;
     this.toAddress = toAddress;
     this.amount = amount;
+  }
+
+  getTokenId(): string | null {
+    return this.tokenId;
+  }
+
+  setTokenId(tokenId: string): void {
+    if (this.tokenId !== null) throw new Error('tokenId must be set once');
+
+    this.tokenId = tokenId;
+  }
+  getInstanceId(): string | null {
+    return this.instanceId;
+  }
+
+  setInstanceId(instanceId: string): void {
+    if (this.instanceId !== null) throw new Error('instanceId must be set once');
+
+    this.instanceId = instanceId;
   }
 }
