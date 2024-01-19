@@ -24,8 +24,6 @@ export class Transfer extends Base {
   ) {
     super(id, createdAt, updatedAt);
 
-    // TODO: token 종류에 따라 instanceId가 nullable 한지가 결정되는데, 입력받은 것으로는 하기 어려운데;
-    if (false) throw new Error('instanceId must be set when token is not ERC-20');
     if (!isLowerAddress(fromAddress)) throw new Error('fromAddress must be lower address');
     if (!isLowerAddress(toAddress)) throw new Error('toAddress must be lower address');
 

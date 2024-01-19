@@ -1,11 +1,11 @@
 import { SNSClient } from '@aws-sdk/client-sns';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { PrismaClient } from '@prisma/client';
-import { WebSocketProvider } from 'ethers';
+import { JsonRpcProvider, WebSocketProvider } from 'ethers';
 import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 
-import { BlockService, ChainService, TransactionService, TransferService } from '../src/application';
+import { BlockService, ChainService, TokenService, TransactionService, TransferService } from '../src/application';
 import {
   ConsoleLogger,
   EthersNetworkConnector,
@@ -29,10 +29,10 @@ const main = async () => {
   const prismaChainRepository = new PrismaChainRepository(prismaClient);
   const chainService = new ChainService(prismaChainRepository);
   const chains = await chainService.findByStandardIdOrCreate(config.chains.map((p) => p.standardId));
-  const ethersProviders = new Map(
+  const websocketProviders = new Map(
     chains.map((c, i) => [c.id, new WebSocketProvider(config.chains[i].websocketJsonRpcUrl)]),
   );
-  const ethersNetworkConnector = new EthersNetworkConnector(ethersProviders);
+  const ethersNetworkConnector = new EthersNetworkConnector(websocketProviders);
 
   const messageSerializer = new MessageSerializer();
   const snsClient = new SNSClient({});
@@ -67,6 +67,15 @@ const main = async () => {
     prismaTransferRepository,
     prismaTokenRepository,
     prismaInstanceRepository,
+    sqsMessageSubscriber,
+    snsMessagePublisher,
+    consoleLogger,
+  );
+
+  const tokenService = new TokenService(
+    prismaTokenRepository,
+    prismaTransferRepository,
+    ethersNetworkConnector,
     sqsMessageSubscriber,
     snsMessagePublisher,
     consoleLogger,

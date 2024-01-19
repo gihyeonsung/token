@@ -1,6 +1,7 @@
 export type Config = {
   chains: {
     standardId: number;
+    httpJsonRpcUrl: string;
     websocketJsonRpcUrl: string;
   }[];
   ipfsGateway: {

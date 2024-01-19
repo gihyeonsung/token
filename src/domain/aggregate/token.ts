@@ -5,12 +5,12 @@ export type TokenType = 'ERC-20' | 'ERC-721' | 'ERC-1155';
 export class Token extends Base {
   readonly chainId: string;
   readonly address: string; //  TODO: selfdestruct
-  readonly type: TokenType | null;
+  readonly type: TokenType | null; // 필요한지 모르겠음
   private name: string | null;
   private symbol: string | null;
   private decimals: number | null;
   private totalSupply: bigint | null;
-  private totalSupplyUpdatedAt: Date | null;
+  private totalSupplyUpdatedAt: Date;
 
   constructor(
     id: string,
@@ -23,12 +23,9 @@ export class Token extends Base {
     symbol: string | null,
     decimals: number | null,
     totalSupply: bigint | null,
-    totalSupplyUpdatedAt: Date | null,
+    totalSupplyUpdatedAt: Date,
   ) {
     super(id, createdAt, updatedAt);
-
-    // TODO
-    if (false) throw new Error('totalSupply and its updated block timestamp must be set at once');
 
     this.chainId = chainId;
     this.address = address;
@@ -56,7 +53,7 @@ export class Token extends Base {
     return this.totalSupply;
   }
 
-  getTotalSupplyUpdatedat(): Date | null {
+  getTotalSupplyUpdatedat(): Date {
     return this.totalSupplyUpdatedAt;
   }
 
@@ -70,20 +67,5 @@ export class Token extends Base {
 
   setDecimals(decimals: number) {
     this.decimals = decimals;
-  }
-
-  // TODO: 업데이트 조건에 안맞으면 던질까 조용히 리턴할까?
-  updateTotalSupply(totalSupply: bigint, totalSupplyUpdatedAt: Date) {
-    if (this.totalSupply === null && this.totalSupplyUpdatedAt == null) {
-      this.totalSupply = totalSupply;
-      this.totalSupplyUpdatedAt;
-      return;
-    }
-
-    // TODO
-    // if (this.totalSupplyUpdatedAtBlockId != null && this.totalSupplyUpdatedAtBlockId > totalSupplyUpdatedAtBlockId) {
-    //   this.totalSupply = totalSupply;
-    //   this.totalSupplyUpdatedAtBlockId;
-    // }
   }
 }

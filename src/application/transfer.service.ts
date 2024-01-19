@@ -104,7 +104,8 @@ export class TransferService {
     const chainId = block.chainId;
 
     for (const log of event.transaction.logs) {
-      const token = await this.tokenRepository.findOneByAddress(chainId, log.address);
+      const tokenAddress = log.address;
+      const token = await this.tokenRepository.findOneByAddress(chainId, tokenAddress);
       const tokenId = token?.id ?? null;
 
       const topics = [log.topic0, log.topic1, log.topic2, log.topic3].filter((t): t is string => typeof t === 'string');
@@ -136,7 +137,7 @@ export class TransferService {
         }
 
         await this.transferRepository.save(transfer);
-        await this.messagePublisher.publish(new TransferIndexedEvent(transfer, chainId, transaction, token));
+        await this.messagePublisher.publish(new TransferIndexedEvent(chainId, transfer.id, tokenAddress));
 
         this.logger.info('transfer indexed', block.number, transaction.hash, transfer.fromAddress, transfer.toAddress);
       }

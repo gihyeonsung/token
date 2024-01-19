@@ -1,87 +1,101 @@
-import { Block, Token, TransferIndexedEvent } from '../domain';
-import { TokenIndexedEvent } from '../domain/event/token-indexed';
-import { BlockRepository } from './block.repository';
+import { Token, TokenIndexedEvent, TransferIndexedEvent } from '../domain';
+
+import { Logger } from './logger';
 import { MessagePublisher } from './message.publisher';
+import { MessageSubscriber } from './message.subscriber';
 import { NetworkConnector } from './network.connector';
 import { TokenRepository } from './token.repository';
+import { TransferRepository } from './transfer.repository';
 
 export class TokenService {
   constructor(
     private readonly tokenRepository: TokenRepository,
+    private readonly transferRepository: TransferRepository,
     private readonly networkConnector: NetworkConnector,
+    private readonly messageSubscriber: MessageSubscriber,
     private readonly messagePublisher: MessagePublisher,
-    private readonly blockRepository: BlockRepository,
-  ) {}
+    private readonly logger: Logger,
+  ) {
+    this.messageSubscriber.on('INDEX_TOKEN', this.indexToken.bind(this));
+  }
 
-  async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
-    const { chainId, transaction, transfer } = event;
-    if (transfer.tokenId !== null) {
+  async indexToken(event: TransferIndexedEvent): Promise<void> {
+    const { chainId, transferId, tokenAddress } = event;
+    const transfer = await this.transferRepository.findOneById(transferId);
+    if (transfer === null) {
+      throw new Error('token index checking but transfer not found');
+    }
+
+    if (transfer.getTokenId() !== null) {
       return;
     }
 
     const now = new Date();
+    const address = tokenAddress;
 
-    const tokenAddress = transaction.toAddress;
-
-    const transactionLog = transaction.logs.at(transfer.logIndex) ?? null;
-    if (transactionLog === null) {
-      throw new Error('transfer event log not found');
-    }
-    // TODO: 토큰의 종류를 식별하는 방법들로 타입을 식별하라
-    // const tokenType = TransferService.extractTransferValues(transactionLog.topics);
-    const tokenType = 'ERC-20';
-
-    const block = await this.blockRepository.findOneLatest(chainId);
-    if (block === null) {
-      throw new Error('transfer indexed but block not found');
-    }
-    const tokenMetadata = await this.fetchTokenMetadata(chainId, block, tokenAddress);
-
-    const token = new Token(
-      this.tokenRepository.nextId(),
-      now,
-      now,
-      tokenAddress,
-      tokenType,
-      tokenMetadata.name,
-      tokenMetadata.symbol,
-      tokenMetadata.decimals,
-      tokenMetadata.totalSupply,
-      tokenMetadata.totalSupplyUpdatedAtBlockId,
-    );
+    const id = this.tokenRepository.nextId();
+    const name = await this.fetchName(chainId, address);
+    const symbol = await this.fetchSymbol(chainId, address);
+    const decimals = await this.fetchDecimals(chainId, address);
+    const totalSupply = await this.fetchTotalSupply(chainId, address);
+    const token = new Token(id, now, now, chainId, address, null, name, symbol, decimals, totalSupply, now);
 
     await this.tokenRepository.save(token);
-    await this.messagePublisher.publish(new TokenIndexedEvent(token));
+    await this.messagePublisher.publish(new TokenIndexedEvent(token, transfer));
+
+    this.logger.info('token indexed', token.address, token.getSymbol());
   }
 
-  async fetchTokenMetadata(
-    chainId: string,
-    block: Block,
-    address: string,
-  ): Promise<{
-    name: string | null;
-    symbol: string | null;
-    decimals: number | null;
-    totalSupply: bigint | null;
-    totalSupplyUpdatedAtBlockId: string | null;
-  }> {
-    const context = { chainId, blockHash: block.hash, address };
-    const [name] = await this.networkConnector.call<[string]>({
-      ...context,
-      functionSignature: 'function name() returns (string)',
-    });
-    const [symbol] = await this.networkConnector.call<[string]>({
-      ...context,
-      functionSignature: 'function symbol() returns (string)',
-    });
-    const [decimals] = await this.networkConnector.call<[bigint]>({
-      ...context,
-      functionSignature: 'function decimals() returns (uint8)',
-    });
-    const [totalSupply] = await this.networkConnector.call<[bigint]>({
-      ...context,
-      functionSignature: 'function totalSupply() returns (uint8)',
-    });
-    return { name, symbol, decimals: Number(decimals), totalSupply, totalSupplyUpdatedAtBlockId: block.id };
+  // TODO: retry client
+  async fetchName(chainId: string, address: string): Promise<string | null> {
+    const context = { chainId, address };
+    try {
+      const [name] = await this.networkConnector.call<[string]>({
+        ...context,
+        functionSignature: 'function name() view returns (string)',
+      });
+      return name;
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchSymbol(chainId: string, address: string): Promise<string | null> {
+    const context = { chainId, address };
+    try {
+      const [symbol] = await this.networkConnector.call<[string]>({
+        ...context,
+        functionSignature: 'function symbol() view returns (string)',
+      });
+      return symbol;
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchDecimals(chainId: string, address: string): Promise<number | null> {
+    const context = { chainId, address };
+    try {
+      const [decimals] = await this.networkConnector.call<[bigint]>({
+        ...context,
+        functionSignature: 'function name() view returns (uint8)',
+      });
+      return Number(decimals);
+    } catch {
+      return null;
+    }
+  }
+
+  async fetchTotalSupply(chainId: string, address: string): Promise<bigint | null> {
+    const context = { chainId, address };
+    try {
+      const [totalSupply] = await this.networkConnector.call<[bigint]>({
+        ...context,
+        functionSignature: 'function totalSupply() view returns (uint256)',
+      });
+      return totalSupply;
+    } catch {
+      return null;
+    }
   }
 }

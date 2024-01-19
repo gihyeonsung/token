@@ -1,4 +1,4 @@
-import { Contract, Block as EthersBlock, WebSocketProvider } from 'ethers';
+import { Contract, Block as EthersBlock, JsonRpcProvider, WebSocketProvider } from 'ethers';
 
 import {
   Block,
