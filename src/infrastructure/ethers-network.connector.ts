@@ -86,7 +86,7 @@ export class EthersNetworkConnector implements NetworkConnector {
     };
   }
 
-  async call<Outputs extends (bigint | string)[]>(args: {
+  async call<Outputs extends (bigint | string)[] | (bigint | string)>(args: {
     chainId: string;
     blockHash?: string;
     address: string;

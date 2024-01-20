@@ -1,7 +1,7 @@
 import { SNSClient } from '@aws-sdk/client-sns';
 import { SQSClient } from '@aws-sdk/client-sqs';
 import { PrismaClient } from '@prisma/client';
-import { JsonRpcProvider, WebSocketProvider } from 'ethers';
+import { WebSocketProvider } from 'ethers';
 import { readFile } from 'fs/promises';
 import { parse } from 'yaml';
 

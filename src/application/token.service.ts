@@ -50,7 +50,7 @@ export class TokenService {
   async fetchName(chainId: string, address: string): Promise<string | null> {
     const context = { chainId, address };
     try {
-      const [name] = await this.networkConnector.call<[string]>({
+      const name = await this.networkConnector.call<string>({
         ...context,
         functionSignature: 'function name() view returns (string)',
       });
@@ -63,7 +63,7 @@ export class TokenService {
   async fetchSymbol(chainId: string, address: string): Promise<string | null> {
     const context = { chainId, address };
     try {
-      const [symbol] = await this.networkConnector.call<[string]>({
+      const symbol = await this.networkConnector.call<string>({
         ...context,
         functionSignature: 'function symbol() view returns (string)',
       });
@@ -76,9 +76,9 @@ export class TokenService {
   async fetchDecimals(chainId: string, address: string): Promise<number | null> {
     const context = { chainId, address };
     try {
-      const [decimals] = await this.networkConnector.call<[bigint]>({
+      const decimals = await this.networkConnector.call<bigint>({
         ...context,
-        functionSignature: 'function name() view returns (uint8)',
+        functionSignature: 'function decimals() view returns (uint8)',
       });
       return Number(decimals);
     } catch {
@@ -89,7 +89,7 @@ export class TokenService {
   async fetchTotalSupply(chainId: string, address: string): Promise<bigint | null> {
     const context = { chainId, address };
     try {
-      const [totalSupply] = await this.networkConnector.call<[bigint]>({
+      const totalSupply = await this.networkConnector.call<bigint>({
         ...context,
         functionSignature: 'function totalSupply() view returns (uint256)',
       });
