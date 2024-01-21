@@ -41,6 +41,7 @@ model Transaction {
   to        String
   logs      Log[]
   transfers Transfer[]
+  approvals Approval[]
 }
 
 model Log {
@@ -75,6 +76,21 @@ model Transfer {
   amount        Decimal     @db.Decimal(78, 0)
 }
 
+model Approval {
+  id             String      @id @db.Uuid
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  transaction    Transaction @relation(fields: [transactionId], references: [id])
+  transactionId  String      @db.Uuid
+  token          Token?      @relation(fields: [tokenId], references: [id])
+  tokenId        String?     @db.Uuid
+  instance       Instance?   @relation(fields: [instanceId], references: [id])
+  instanceId     String?     @db.Uuid
+  ownerAddress   String
+  spenderAddress String
+  amount         Decimal     @db.Decimal(78, 0)
+}
+
 model Token {
   id                   String      @id @db.Uuid
   createdAt            DateTime    @default(now())
@@ -92,6 +108,7 @@ model Token {
   transfers            Transfer[]
   balances             Balance[]
   allowances           Allowance[]
+  approvals            Approval[]
 }
 
 model Instance {
@@ -109,6 +126,7 @@ model Instance {
   transfer          Transfer[]
   balances          Balance[]
   allowances        Allowance[]
+  approval          Approval[]
 }
 
 model Balance {
