@@ -86,10 +86,15 @@ const main = async () => {
 
   const expressApp = express();
 
+  expressApp.use((req, res, next) => {
+    next();
+    consoleLogger.info('handled', req.method, req.originalUrl);
+  });
+
   const chainController = new ChainController(expressApp, prismaChainRepository);
 
   expressApp.listen(config.api.port, config.api.host, 511, () => {
-    consoleLogger.info(`application up`, config.api.host, config.api.port);
+    consoleLogger.info(`application ready`, config.api.host, config.api.port);
   });
 };
 

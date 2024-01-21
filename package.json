@@ -1,6 +1,7 @@
 {
   "scripts": {
     "dev:api": "nodemon --ext \"ts\" --exec \"ts-node app/api.ts\" --watch \"**/*.ts\"",
+    "dev:api:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register app/api",
     "dev:worker": "nodemon --ext \"ts\" --exec \"ts-node app/worker.ts\" --watch \"**/*.ts\"",
     "dev:worker:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register app/worker",
     "dev:importer": "nodemon --ext \"ts\" --exec \"ts-node app/importer.ts\" --watch \"**/*.ts\"",
