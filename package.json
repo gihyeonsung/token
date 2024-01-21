@@ -4,6 +4,9 @@
     "dev:worker": "nodemon --ext \"ts\" --exec \"ts-node app/worker.ts\" --watch \"**/*.ts\"",
     "dev:worker:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register app/worker",
     "dev:importer": "nodemon --ext \"ts\" --exec \"ts-node app/importer.ts\" --watch \"**/*.ts\"",
+    "build": "tsc",
+    "start:worker": "tsc && pm2 start dist/app/worker.js -i 16",
+    "start:importer": "tsc && node dist/app/importer.js",
     "test": "jest",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand"
   },

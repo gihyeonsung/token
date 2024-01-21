@@ -13,40 +13,33 @@ export class InstanceService {
   static readonly IPFS_GATEWAY_BASE_URL = 'https://ipfs.io/ipfs/';
 
   async handleTransferIndexedEvent(event: TransferIndexedEvent): Promise<void> {
-    const { chainId, transfer, token } = event;
-    const instanceId = transfer.instanceId;
-    if (token === null || token.type === 'ERC-20' || instanceId === null) {
-      return;
-    }
-
-    const instance = await this.instanceRepository.findOneById(instanceId);
-    if (instance === null) {
-      throw new Error('instance id exist, but cannot find one');
-    }
-
-    if (!instance.shouldUriAndMetadataUpdated()) {
-      return;
-    }
-
-    const instanceUriAndMetadataUpdatedAtBlock = await this.blockRepository.findOneLatest(chainId);
-    if (instanceUriAndMetadataUpdatedAtBlock === null) {
-      throw new Error('transfered but no block found');
-    }
-
-    const uri = await this.fetchUri(chainId, instanceUriAndMetadataUpdatedAtBlock, token, instance);
-    if (uri === null) {
-      // tokenURI()는 721 스펙상 OPTIOANL 하다
-      return;
-    }
-
-    const metadata = await this.fetchMetadata(uri);
-    if (metadata === null) {
-      return;
-    }
-
-    instance.updateUriAndMetadata(uri, metadata, instanceUriAndMetadataUpdatedAtBlock.id);
-
-    await this.instanceRepository.save(instance);
+    // const { chainId, transfer, token } = event;
+    // const instanceId = transfer.instanceId;
+    // if (token === null || token.type === 'ERC-20' || instanceId === null) {
+    //   return;
+    // }
+    // const instance = await this.instanceRepository.findOneById(instanceId);
+    // if (instance === null) {
+    //   throw new Error('instance id exist, but cannot find one');
+    // }
+    // if (!instance.shouldUriAndMetadataUpdated()) {
+    //   return;
+    // }
+    // const instanceUriAndMetadataUpdatedAtBlock = await this.blockRepository.findOneLatest(chainId);
+    // if (instanceUriAndMetadataUpdatedAtBlock === null) {
+    //   throw new Error('transfered but no block found');
+    // }
+    // const uri = await this.fetchUri(chainId, instanceUriAndMetadataUpdatedAtBlock, token, instance);
+    // if (uri === null) {
+    //   // tokenURI()는 721 스펙상 OPTIOANL 하다
+    //   return;
+    // }
+    // const metadata = await this.fetchMetadata(uri);
+    // if (metadata === null) {
+    //   return;
+    // }
+    // instance.updateUriAndMetadata(uri, metadata, instanceUriAndMetadataUpdatedAtBlock.id);
+    // await this.instanceRepository.save(instance);
   }
 
   async handleTokenIndexedEvent(event: TokenIndexedEvent): Promise<void> {
