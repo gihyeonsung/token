@@ -1,10 +1,10 @@
-import { BlockIndexedEvent, IndexTransactionCommand, Log, Transaction, TransactionIndexedEvent } from '../domain';
+import { BlockIndexedEvent, IndexTransactionCommand, Log, Transaction, TransactionIndexedEvent } from '../../domain';
 
-import { Logger } from './logger';
-import { MessagePublisher } from './message.publisher';
-import { MessageSubscriber } from './message.subscriber';
-import { NetworkConnector } from './network.connector';
-import { TransactionRepository } from './transaction.repository';
+import { Logger } from '../logger';
+import { MessagePublisher } from '../message.publisher';
+import { MessageSubscriber } from '../message.subscriber';
+import { NetworkConnector } from '../network.connector';
+import { TransactionRepository } from '../repository';
 
 export class TransactionService {
   constructor(

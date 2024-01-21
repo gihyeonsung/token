@@ -1,10 +1,10 @@
-import { Block, BlockIndexedEvent, IndexBlockCommand } from '../domain';
+import { Block, BlockIndexedEvent, IndexBlockCommand } from '../../domain';
 
-import { BlockRepository } from './block.repository';
-import { Logger } from './logger';
-import { MessagePublisher } from './message.publisher';
-import { MessageSubscriber } from './message.subscriber';
-import { NetworkConnector } from './network.connector';
+import { BlockRepository } from '../repository';
+import { Logger } from '../logger';
+import { MessagePublisher } from '../message.publisher';
+import { MessageSubscriber } from '../message.subscriber';
+import { NetworkConnector } from '../network.connector';
 
 export class BlockService {
   constructor(

@@ -1,11 +1,10 @@
-import { Token, TokenIndexedEvent, TransferIndexedEvent } from '../domain';
+import { Token, TokenIndexedEvent, TransferIndexedEvent } from '../../domain';
 
-import { Logger } from './logger';
-import { MessagePublisher } from './message.publisher';
-import { MessageSubscriber } from './message.subscriber';
-import { NetworkConnector } from './network.connector';
-import { TokenRepository } from './token.repository';
-import { TransferRepository } from './transfer.repository';
+import { Logger } from '../logger';
+import { MessagePublisher } from '../message.publisher';
+import { MessageSubscriber } from '../message.subscriber';
+import { NetworkConnector } from '../network.connector';
+import { TokenRepository, TransferRepository } from '../repository';
 
 export class TokenService {
   constructor(

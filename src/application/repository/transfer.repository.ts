@@ -1,4 +1,4 @@
-import { Transfer } from '../domain';
+import { Transfer } from '../../domain';
 
 import { GenericRepository } from './generic.repository';
 

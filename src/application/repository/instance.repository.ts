@@ -1,4 +1,4 @@
-import { Instance } from '../domain';
+import { Instance } from '../../domain';
 
 import { GenericRepository } from './generic.repository';
 

@@ -1,4 +1,4 @@
-import { Token } from '../domain';
+import { Token } from '../../domain';
 
 import { GenericRepository } from './generic.repository';
 

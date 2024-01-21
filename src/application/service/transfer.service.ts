@@ -5,15 +5,12 @@ import {
   Transfer,
   TransferIndexedEvent,
   decodeEvent,
-} from '../domain';
+} from '../../domain';
 
-import { InstanceRepository } from './instance.repository';
-import { Logger } from './logger';
-import { MessagePublisher } from './message.publisher';
-import { MessageSubscriber } from './message.subscriber';
-import { TokenRepository } from './token.repository';
-import { TransactionRepository } from './transaction.repository';
-import { TransferRepository } from './transfer.repository';
+import { Logger } from '../logger';
+import { MessagePublisher } from '../message.publisher';
+import { MessageSubscriber } from '../message.subscriber';
+import { InstanceRepository, TokenRepository, TransactionRepository, TransferRepository } from '../repository';
 
 export class TransferService {
   constructor(

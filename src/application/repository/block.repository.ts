@@ -1,4 +1,4 @@
-import { Block } from '../domain';
+import { Block } from '../../domain';
 
 import { GenericRepository } from './generic.repository';
 

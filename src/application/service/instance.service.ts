@@ -1,7 +1,6 @@
-import { Block, Instance, Token, TokenIndexedEvent, TransferIndexedEvent } from '../domain';
-import { BlockRepository } from './block.repository';
-import { InstanceRepository } from './instance.repository';
-import { NetworkConnector } from './network.connector';
+import { Block, Instance, Token, TokenIndexedEvent, TransferIndexedEvent } from '../../domain';
+import { NetworkConnector } from '../network.connector';
+import { BlockRepository, InstanceRepository } from '../repository';
 
 export class InstanceService {
   constructor(

@@ -1,6 +1,6 @@
-import { Chain } from '../domain';
+import { Chain } from '../../domain';
 
-import { ChainRepository } from './chain.repository';
+import { ChainRepository } from '../repository';
 
 export class ChainService {
   constructor(private readonly chainRepository: ChainRepository) {}

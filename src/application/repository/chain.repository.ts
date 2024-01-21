@@ -1,4 +1,4 @@
-import { Chain } from '../domain';
+import { Chain } from '../../domain';
 
 import { GenericRepository } from './generic.repository';
 
