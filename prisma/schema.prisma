@@ -76,29 +76,30 @@ model Transfer {
 }
 
 model Token {
-  id                   String     @id @db.Uuid
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
-  chain                Chain      @relation(fields: [chainId], references: [id])
-  chainId              String     @db.Uuid
+  id                   String      @id @db.Uuid
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  chain                Chain       @relation(fields: [chainId], references: [id])
+  chainId              String      @db.Uuid
   address              String
   type                 String?
   name                 String?
   symbol               String?
   decimals             Int?
-  totalSupply          Decimal?   @db.Decimal(78, 0)
+  totalSupply          Decimal?    @db.Decimal(78, 0)
   totalSupplyUpdatedAt DateTime
   instances            Instance[]
   transfers            Transfer[]
   balances             Balance[]
+  allowances           Allowance[]
 }
 
 model Instance {
-  id                String     @id @db.Uuid
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  token             Token      @relation(fields: [tokenId], references: [id])
-  tokenId           String     @unique @db.Uuid
+  id                String      @id @db.Uuid
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  token             Token       @relation(fields: [tokenId], references: [id])
+  tokenId           String      @unique @db.Uuid
   index             String
   ownerAddress      String
   uri               String?
@@ -107,16 +108,29 @@ model Instance {
   metadataUpdatedAt DateTime?
   transfer          Transfer[]
   balances          Balance[]
+  allowances        Allowance[]
 }
 
 model Balance {
-  id           String   @id @db.Uuid
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  token        Token    @relation(fields: [tokenId], references: [id])
-  tokenId      String   @db.Uuid
-  instance     Instance @relation(fields: [instanceId], references: [id])
-  instanceId   String   @db.Uuid
+  id           String    @id @db.Uuid
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  token        Token     @relation(fields: [tokenId], references: [id])
+  tokenId      String    @db.Uuid
+  instance     Instance? @relation(fields: [instanceId], references: [id])
+  instanceId   String?   @db.Uuid
   ownerAddress String
-  amount       Decimal? @db.Decimal(78, 0)
+  amount       Decimal?  @db.Decimal(78, 0)
+}
+
+model Allowance {
+  id             String    @id
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  token          Token     @relation(fields: [tokenId], references: [id])
+  tokenId        String    @db.Uuid
+  instance       Instance? @relation(fields: [instanceId], references: [id])
+  instanceId     String?   @db.Uuid
+  ownerAddress   String
+  spenderAddress String
 }
