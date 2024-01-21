@@ -3,7 +3,7 @@ import { Base } from './base';
 
 export class Instance extends Base {
   readonly tokenId: string;
-  readonly index: bigint;
+  readonly index: string;
   private ownerAddress: string;
   private uri: string | null;
   private uriUpdatedAt: Date | null;
@@ -15,7 +15,7 @@ export class Instance extends Base {
     createdAt: Date,
     updatedAt: Date,
     tokenId: string,
-    index: bigint,
+    index: string,
     ownerAddress: string,
     uri: string | null,
     uriUpdatedAt: Date | null,

@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE "Balance" ALTER COLUMN "amount" DROP NOT NULL,
+ALTER COLUMN "amount" SET DATA TYPE DECIMAL(78,0);
+
+-- AlterTable
+ALTER TABLE "Token" ALTER COLUMN "totalSupply" SET DATA TYPE DECIMAL(78,0);
+
+-- AlterTable
+ALTER TABLE "Transfer" ALTER COLUMN "amount" SET DATA TYPE DECIMAL(78,0);

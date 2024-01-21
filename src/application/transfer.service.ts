@@ -43,7 +43,7 @@ export class TransferService {
   static extractTransferValues(
     topics: string[],
     data: string,
-  ): { from: string; to: string; amount: bigint; index: bigint | null }[] {
+  ): { from: string; to: string; amount: bigint; index: string | null }[] {
     if (topics.length === 3 && topics[0] === this.TOPIC_0_20_TRANSFER) {
       const args = decodeEvent<[string, string, bigint]>(this.SIGNATURE_20_TRANSFER, topics, data);
       if (args === null) {
@@ -57,7 +57,7 @@ export class TransferService {
       if (args === null) {
         throw new Error('expected decoding 721 transfer, but not decoded');
       }
-      return [{ from: args[0], to: args[1], amount: 1n, index: args[2] }];
+      return [{ from: args[0], to: args[1], amount: 1n, index: args[2].toString() }];
     }
 
     if (topics.length === 4 && topics[0] === this.TOPIC_0_1155_TRANSFER_SINGLE) {
@@ -69,7 +69,7 @@ export class TransferService {
       if (args === null) {
         throw new Error('expected decoding 1155 single transfer, but not decoded');
       }
-      return [{ from: args[1], to: args[2], amount: args[4], index: args[3] }];
+      return [{ from: args[1], to: args[2], amount: args[4], index: args[3].toString() }];
     }
 
     if (topics.length === 4 && topics[0] === this.TOPIC_0_1155_TRANSFER_BATCH) {
@@ -89,7 +89,7 @@ export class TransferService {
       const to = args[2];
       for (let i = 0; i < args[3].length; i++) {
         const amount = args[4][i];
-        const index = args[3][i];
+        const index = args[3][i].toString();
         values.push({ from, to, amount, index });
       }
       return values;
@@ -131,10 +131,6 @@ export class TransferService {
           transferValue.to,
           transferValue.amount,
         );
-        if (transfer.amount > 9223372036854775807n) {
-          this.logger.error('amount too large. skip save', transfer.amount);
-          continue;
-        }
 
         await this.transferRepository.save(transfer);
         await this.messagePublisher.publish(new TransferIndexedEvent(chainId, transfer.id, tokenAddress));
@@ -145,9 +141,9 @@ export class TransferService {
   }
 
   async setEmptyTokenId(event: TokenIndexedEvent) {
-    const { token, transferTriggered } = event;
+    const { token, transferIdTriggered } = event;
 
-    const transfer = await this.transferRepository.findOneById(transferTriggered.id);
+    const transfer = await this.transferRepository.findOneById(transferIdTriggered);
     if (transfer === null) {
       throw new Error('token indexed triggered by transfer indexing, but the transfer not found');
     }

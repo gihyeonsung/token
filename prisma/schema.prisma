@@ -72,7 +72,7 @@ model Transfer {
   instanceId    String?     @db.Uuid
   fromAddress   String
   toAddress     String
-  amount        BigInt
+  amount        Decimal     @db.Decimal(78, 0)
 }
 
 model Token {
@@ -86,7 +86,7 @@ model Token {
   name                 String?
   symbol               String?
   decimals             Int?
-  totalSupply          BigInt?
+  totalSupply          Decimal?   @db.Decimal(78, 0)
   totalSupplyUpdatedAt DateTime
   instances            Instance[]
   transfers            Transfer[]
@@ -99,7 +99,7 @@ model Instance {
   updatedAt         DateTime   @updatedAt
   token             Token      @relation(fields: [tokenId], references: [id])
   tokenId           String     @unique @db.Uuid
-  index             BigInt
+  index             String
   ownerAddress      String
   uri               String?
   uriUpdatedAt      DateTime?
@@ -118,5 +118,5 @@ model Balance {
   instance     Instance @relation(fields: [instanceId], references: [id])
   instanceId   String   @db.Uuid
   ownerAddress String
-  amount       BigInt
+  amount       Decimal? @db.Decimal(78, 0)
 }

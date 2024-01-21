@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 import { TransferRepository } from '../application';
@@ -25,7 +25,7 @@ export class PrismaTransferRepository implements TransferRepository {
       dalEntity.instanceId,
       dalEntity.fromAddress,
       dalEntity.toAddress,
-      dalEntity.amount,
+      BigInt(dalEntity.amount.toFixed()),
     );
   }
 
@@ -39,7 +39,7 @@ export class PrismaTransferRepository implements TransferRepository {
       instanceId: aggregate.getInstanceId(),
       fromAddress: aggregate.fromAddress,
       toAddress: aggregate.toAddress,
-      amount: aggregate.amount,
+      amount: new Prisma.Decimal(aggregate.amount.toString()),
     };
     await this.prismaClient.transfer.upsert({
       where: { id: dalEntity.id },

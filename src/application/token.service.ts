@@ -21,12 +21,8 @@ export class TokenService {
 
   async indexToken(event: TransferIndexedEvent): Promise<void> {
     const { chainId, transferId, tokenAddress } = event;
-    const transfer = await this.transferRepository.findOneById(transferId);
-    if (transfer === null) {
-      throw new Error('token index checking but transfer not found');
-    }
-
-    if (transfer.getTokenId() !== null) {
+    const tokenFound = await this.tokenRepository.findOneByAddress(chainId, tokenAddress);
+    if (tokenFound !== null) {
       return;
     }
 
@@ -41,7 +37,7 @@ export class TokenService {
     const token = new Token(id, now, now, chainId, address, null, name, symbol, decimals, totalSupply, now);
 
     await this.tokenRepository.save(token);
-    await this.messagePublisher.publish(new TokenIndexedEvent(token, transfer));
+    await this.messagePublisher.publish(new TokenIndexedEvent(token, transferId));
 
     this.logger.info('token indexed', token.address, token.getSymbol());
   }

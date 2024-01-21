@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
 import { TokenRepository } from '../application';
@@ -26,7 +26,7 @@ export class PrismaTokenRepository implements TokenRepository {
       dalEntity.name,
       dalEntity.symbol,
       dalEntity.decimals,
-      dalEntity.totalSupply,
+      dalEntity.totalSupply ? BigInt(dalEntity.totalSupply.toFixed()) : null,
       dalEntity.totalSupplyUpdatedAt,
     );
   }
@@ -42,7 +42,8 @@ export class PrismaTokenRepository implements TokenRepository {
       name: aggregate.getName(),
       symbol: aggregate.getSymbol(),
       decimals: aggregate.getDecimals(),
-      totalSupply: aggregate.getTotalSupply(),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+      totalSupply: aggregate.getTotalSupply() ? new Prisma.Decimal(aggregate.getTotalSupply()?.toString()!) : null,
       totalSupplyUpdatedAt: aggregate.getTotalSupplyUpdatedat(),
     };
     await this.prismaClient.token.upsert({
@@ -67,7 +68,7 @@ export class PrismaTokenRepository implements TokenRepository {
       dalEntity.name,
       dalEntity.symbol,
       dalEntity.decimals,
-      dalEntity.totalSupply,
+      dalEntity.totalSupply ? BigInt(dalEntity.totalSupply.toFixed()) : null,
       dalEntity.totalSupplyUpdatedAt,
     );
   }

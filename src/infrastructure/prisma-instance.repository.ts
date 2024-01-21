@@ -50,7 +50,7 @@ export class PrismaInstanceRepository implements InstanceRepository {
     });
   }
 
-  async findOneByTokenIdAndIndex(tokenId: string, index: bigint): Promise<Instance | null> {
+  async findOneByTokenIdAndIndex(tokenId: string, index: string): Promise<Instance | null> {
     const dalEntity = await this.prismaClient.instance.findFirst({ where: { tokenId, index } });
     if (dalEntity === null) {
       return null;

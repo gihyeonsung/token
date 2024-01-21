@@ -1,4 +1,4 @@
-import { Token, Transfer } from '../aggregate';
+import { Token } from '../aggregate';
 
 export class TokenIndexedEvent {
   static TOPIC = TokenIndexedEvent.name;
@@ -7,6 +7,6 @@ export class TokenIndexedEvent {
 
   constructor(
     readonly token: Token,
-    readonly transferTriggered: Transfer,
+    readonly transferIdTriggered: string,
   ) {}
 }
