@@ -1,12 +1,12 @@
-import { isLowerAddress } from '../utils';
+import { Address } from '../value';
 import { Base } from './base';
 
-export class Transfer extends Base {
+export class Approval extends Base {
   readonly transactionId: string;
-  readonly fromAddress: string;
-  readonly toAddress: string;
-  private tokenId: string | null; // 무슨 토큰인지 모르고 색인된 경우 null
-  private instanceId: string | null; // ERC-721, ERC-1155만 값이 있음
+  readonly ownerAddress: Address;
+  readonly spenderAddress: Address;
+  private tokenId: string | null;
+  private instanceId: string | null;
   readonly amount: bigint;
 
   constructor(
@@ -14,26 +14,25 @@ export class Transfer extends Base {
     createdAt: Date,
     updatedAt: Date,
     transactionId: string,
-    fromAddress: string,
-    toAddress: string,
     tokenId: string | null,
     instanceId: string | null,
+    ownerAddress: Address,
+    spenderAddress: Address,
     amount: bigint,
   ) {
     super(id, createdAt, updatedAt);
 
-    if (!isLowerAddress(fromAddress)) throw new Error('fromAddress must be lower address');
-    if (!isLowerAddress(toAddress)) throw new Error('toAddress must be lower address');
-
     this.transactionId = transactionId;
-    this.fromAddress = fromAddress;
-    this.toAddress = toAddress;
     this.tokenId = tokenId;
     this.instanceId = instanceId;
+    this.ownerAddress = ownerAddress;
+    this.spenderAddress = spenderAddress;
     this.amount = amount;
   }
 
-  getTokenId = (): string | null => this.tokenId;
+  getTokenId(): string | null {
+    return this.tokenId;
+  }
 
   setTokenId(tokenId: string): void {
     if (this.tokenId !== null) throw new Error('tokenId must be set once');
@@ -41,7 +40,9 @@ export class Transfer extends Base {
     this.tokenId = tokenId;
   }
 
-  getInstanceId = (): string | null => this.instanceId;
+  getInstanceId(): string | null {
+    return this.instanceId;
+  }
 
   setInstanceId(instanceId: string): void {
     if (this.instanceId !== null) throw new Error('instanceId must be set once');

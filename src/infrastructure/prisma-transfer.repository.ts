@@ -20,11 +20,11 @@ export class PrismaTransferRepository implements TransferRepository {
       dalEntity.id,
       dalEntity.createdAt,
       dalEntity.updatedAt,
+      dalEntity.fromAddress,
+      dalEntity.toAddress,
       dalEntity.transactionId,
       dalEntity.tokenId,
       dalEntity.instanceId,
-      dalEntity.fromAddress,
-      dalEntity.toAddress,
       BigInt(dalEntity.amount.toFixed()),
     );
   }

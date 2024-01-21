@@ -130,10 +130,10 @@ export class TransferService {
           now,
           now,
           transaction.id,
-          tokenId,
-          instanceId,
           transferValue.from,
           transferValue.to,
+          tokenId,
+          instanceId,
           transferValue.amount,
         );
 

@@ -1,36 +1,30 @@
-import { isLowerAddress } from '../utils';
+import { Address } from '../value';
 import { Base } from './base';
 
-export class Transfer extends Base {
-  readonly transactionId: string;
-  readonly fromAddress: string;
-  readonly toAddress: string;
-  private tokenId: string | null; // 무슨 토큰인지 모르고 색인된 경우 null
-  private instanceId: string | null; // ERC-721, ERC-1155만 값이 있음
-  readonly amount: bigint;
+export class Balance extends Base {
+  readonly ownerAddress: Address;
+  private tokenId: string | null;
+  private instanceId: string | null;
+  private amount: bigint;
+  private amountUpdatedAt: Date;
 
   constructor(
     id: string,
     createdAt: Date,
     updatedAt: Date,
-    transactionId: string,
-    fromAddress: string,
-    toAddress: string,
+    ownerAddress: Address,
     tokenId: string | null,
     instanceId: string | null,
     amount: bigint,
+    amountUpdatedAt: Date,
   ) {
     super(id, createdAt, updatedAt);
 
-    if (!isLowerAddress(fromAddress)) throw new Error('fromAddress must be lower address');
-    if (!isLowerAddress(toAddress)) throw new Error('toAddress must be lower address');
-
-    this.transactionId = transactionId;
-    this.fromAddress = fromAddress;
-    this.toAddress = toAddress;
+    this.ownerAddress = ownerAddress;
     this.tokenId = tokenId;
     this.instanceId = instanceId;
     this.amount = amount;
+    this.amountUpdatedAt = amountUpdatedAt;
   }
 
   getTokenId = (): string | null => this.tokenId;
@@ -47,5 +41,16 @@ export class Transfer extends Base {
     if (this.instanceId !== null) throw new Error('instanceId must be set once');
 
     this.instanceId = instanceId;
+  }
+
+  getAmount = (): bigint => this.amount;
+
+  updateAmount(amount: bigint, amountFetchedAt: Date): void {
+    if (this.amountUpdatedAt.getTime() > amountFetchedAt.getTime()) {
+      return;
+    }
+
+    this.amount = amount;
+    this.amountUpdatedAt = new Date();
   }
 }
