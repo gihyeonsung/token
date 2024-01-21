@@ -21,10 +21,6 @@ export class TokenService {
 
   async indexToken(event: TransferIndexedEvent): Promise<void> {
     const { chainId, transferId, tokenAddress } = event;
-    if (!chainId) {
-      this.logger.error('chainId falsy');
-      return;
-    }
 
     const tokenFound = await this.tokenRepository.findOneByAddress(chainId, tokenAddress);
     if (tokenFound !== null) {
