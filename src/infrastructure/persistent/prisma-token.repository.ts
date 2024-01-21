@@ -1,8 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
-import { TokenRepository } from '../application';
-import { Token, TokenType } from '../domain';
+import { TokenRepository } from '../../application';
+import { Token, TokenType } from '../../domain';
 
 export class PrismaTokenRepository implements TokenRepository {
   constructor(private readonly prismaClient: PrismaClient) {}

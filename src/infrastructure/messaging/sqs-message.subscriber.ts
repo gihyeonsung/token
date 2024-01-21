@@ -1,6 +1,6 @@
 import { DeleteMessageCommand, ReceiveMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 
-import { Handler, MessageSubscriber } from '../application';
+import { Handler, MessageSubscriber } from '../../application';
 
 import { MessageSerializer } from './message.serializer';
 

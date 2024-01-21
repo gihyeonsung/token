@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
-import { TransactionRepository } from '../application';
-import { Log, Transaction } from '../domain';
+import { TransactionRepository } from '../../application';
+import { Log, Transaction } from '../../domain';
 
 export class PrismaTransactionRepository implements TransactionRepository {
   constructor(private readonly prismaClient: PrismaClient) {}

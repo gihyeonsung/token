@@ -1,7 +1,7 @@
 import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 
-import { MessagePublisher } from '../application';
-import { Message } from '../domain';
+import { MessagePublisher } from '../../application';
+import { Message } from '../../domain';
 
 import { MessageSerializer } from './message.serializer';
 

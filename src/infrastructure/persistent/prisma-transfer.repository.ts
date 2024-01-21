@@ -1,8 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 
-import { TransferRepository } from '../application';
-import { Transfer } from '../domain';
+import { TransferRepository } from '../../application';
+import { Transfer } from '../../domain';
 
 export class PrismaTransferRepository implements TransferRepository {
   constructor(private readonly prismaClient: PrismaClient) {}
