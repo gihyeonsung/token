@@ -65,6 +65,7 @@ const main = async () => {
 
   const transfersService = new TransferService(
     prismaTransferRepository,
+    prismaTransactionRepository,
     prismaTokenRepository,
     prismaInstanceRepository,
     sqsMessageSubscriber,

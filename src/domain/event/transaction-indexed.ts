@@ -1,4 +1,3 @@
-import { Block, Transaction } from '../aggregate';
 import { Message } from '../message';
 
 export class TransactionIndexedEvent implements Message {
@@ -8,7 +7,6 @@ export class TransactionIndexedEvent implements Message {
 
   constructor(
     readonly transactionId: string,
-    readonly block: Block,
-    readonly transaction: Transaction,
+    readonly chainId: string,
   ) {}
 }

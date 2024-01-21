@@ -12,11 +12,13 @@ import { Logger } from './logger';
 import { MessagePublisher } from './message.publisher';
 import { MessageSubscriber } from './message.subscriber';
 import { TokenRepository } from './token.repository';
+import { TransactionRepository } from './transaction.repository';
 import { TransferRepository } from './transfer.repository';
 
 export class TransferService {
   constructor(
     private readonly transferRepository: TransferRepository,
+    private readonly transactionRepository: TransactionRepository,
     private readonly tokenRepository: TokenRepository,
     private readonly instanceRepository: InstanceRepository,
     private readonly messageSubscriber: MessageSubscriber,
@@ -100,10 +102,13 @@ export class TransferService {
 
   // TODO: ExtractTransferCommand 여러개를 발행해서 나눠 처리하는식으로 해야할듯
   async indexTransfers(event: TransactionIndexedEvent) {
-    const { block, transaction } = event;
-    const chainId = block.chainId;
+    const { chainId, transactionId } = event;
+    const transaction = await this.transactionRepository.findOneById(transactionId);
+    if (transaction === null) {
+      throw new Error('got transaction indexed event, but not found');
+    }
 
-    for (const log of event.transaction.logs) {
+    for (const log of transaction.logs) {
       const tokenAddress = log.address;
       const token = await this.tokenRepository.findOneByAddress(chainId, tokenAddress);
       const tokenId = token?.id ?? null;
@@ -135,7 +140,7 @@ export class TransferService {
         await this.transferRepository.save(transfer);
         await this.messagePublisher.publish(new TransferIndexedEvent(chainId, transfer.id, tokenAddress));
 
-        this.logger.info('transfer indexed', block.number, transaction.hash, transfer.fromAddress, transfer.toAddress);
+        this.logger.info('transfer indexed', transaction.hash, transfer.fromAddress, transfer.toAddress);
       }
     }
   }
