@@ -4,6 +4,10 @@ export type Config = {
     httpJsonRpcUrl: string;
     websocketJsonRpcUrl: string;
   }[];
+  api: {
+    host: string;
+    port: number;
+  };
   ipfsGateway: {
     baseUrl: string;
   };
