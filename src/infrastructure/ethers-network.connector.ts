@@ -1,4 +1,4 @@
-import { Contract, Block as EthersBlock, JsonRpcProvider, WebSocketProvider } from 'ethers';
+import { Contract, Block as EthersBlock, WebSocketProvider } from 'ethers';
 
 import {
   Block,
@@ -62,6 +62,17 @@ export class EthersNetworkConnector implements NetworkConnector {
     return EthersNetworkConnector.parseEthersBlock(ethersBlock);
   }
 
+  async fetchTransactionReceiptByHashBatch(
+    chainId: string,
+    transactionHashes: string[],
+  ): Promise<(TransactionReceipt | null)[]> {
+    return await Promise.all(
+      transactionHashes.map(
+        async (transactionHash) => await this.fetchTransactionReceiptByHash(chainId, transactionHash),
+      ),
+    );
+  }
+
   async fetchTransactionReceiptByHash(chainId: string, transactionHash: string): Promise<TransactionReceipt | null> {
     const receipt = await this.provider(chainId).getTransactionReceipt(transactionHash);
     if (receipt === null) {
@@ -74,6 +85,7 @@ export class EthersNetworkConnector implements NetworkConnector {
     }
 
     return {
+      hash: receipt.hash.toLowerCase(),
       index: receipt.index,
       from: receipt.from.toLowerCase(),
       to: to.toLowerCase(),

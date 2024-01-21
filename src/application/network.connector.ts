@@ -18,6 +18,7 @@ export type TransactionReceiptLog = {
 };
 
 export type TransactionReceipt = {
+  hash: string;
   index: number;
   from: string;
   to: string;
@@ -31,6 +32,10 @@ export interface NetworkConnector {
   fetchBlockByHash(chainId: string, blockHash: string | null): Promise<Block | null>;
   fetchBlockByNumber(chainId: string, blockNumber: number | null): Promise<Block | null>;
   fetchTransactionReceiptByHash(chainId: string, transactionHash: string): Promise<TransactionReceipt | null>;
+  fetchTransactionReceiptByHashBatch(
+    chainId: string,
+    transactionHashes: string[],
+  ): Promise<(TransactionReceipt | null)[]>;
   call<Outputs extends (bigint | string)[] | (bigint | string)>(args: {
     chainId: string;
     blockHash?: string;

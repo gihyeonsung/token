@@ -20,8 +20,11 @@ export class TransactionService {
   async indexTransactions(event: BlockIndexedEvent) {
     const { block, transactionHashes } = event;
     const chainId = block.chainId;
-    for (const transactionHash of transactionHashes) {
-      const receipt = await this.networkConnector.fetchTransactionReceiptByHash(chainId, transactionHash);
+    const transactionReceipts = await this.networkConnector.fetchTransactionReceiptByHashBatch(
+      chainId,
+      transactionHashes,
+    );
+    for (const receipt of transactionReceipts) {
       if (receipt === null) {
         throw new Error(`transaction receipt not found`);
       }
@@ -35,7 +38,7 @@ export class TransactionService {
         now,
         now,
         block.id,
-        transactionHash,
+        receipt.hash,
         receipt.index,
         receipt.from,
         receipt.to,
